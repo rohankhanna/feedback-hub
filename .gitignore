@@ -1,0 +1,5 @@
+.state/
+config/*.env
+feedback
+last
+AGENTS.md.sha256
