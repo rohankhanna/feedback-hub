@@ -1,0 +1,182 @@
+{
+  "title": "feedback-hub public architecture: canonical artifacts and promotion flow",
+  "description": "How raw project feedback becomes curated cross-project learnings through explicit review rather than direct project writes.",
+  "width": 1280,
+  "height": 820,
+  "groups": [
+    {
+      "x": 44,
+      "y": 104,
+      "w": 336,
+      "h": 570,
+      "label": "Raw project feedback",
+      "subtitle": "project-owned canonical write surface"
+    },
+    {
+      "x": 472,
+      "y": 104,
+      "w": 336,
+      "h": 570,
+      "label": "Promotion review",
+      "subtitle": "explicit selection and generalization"
+    },
+    {
+      "x": 900,
+      "y": 104,
+      "w": 336,
+      "h": 570,
+      "label": "Curated learnings",
+      "subtitle": "shared read-only cross-project memory"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "raw_artifacts",
+      "x": 84,
+      "y": 172,
+      "w": 256,
+      "h": 150,
+      "fill": "#FFF2D9",
+      "stroke": "#9D6C00",
+      "lines": [
+        "Raw project artifacts",
+        "lessons",
+        "decisions",
+        "incidents",
+        "incoming and outgoing guidance"
+      ]
+    },
+    {
+      "id": "auditability",
+      "x": 84,
+      "y": 404,
+      "w": 256,
+      "h": 138,
+      "fill": "#F7EEE4",
+      "stroke": "#8B6338",
+      "lines": [
+        "Auditability rule",
+        "promoted learnings should remain",
+        "traceable back to source artifacts"
+      ]
+    },
+    {
+      "id": "review",
+      "x": 512,
+      "y": 208,
+      "w": 256,
+      "h": 132,
+      "fill": "#F5F0E6",
+      "stroke": "#7E6A3D",
+      "lines": [
+        "Review gate",
+        "select only reusable material",
+        "generalize and sanitize before promotion"
+      ]
+    },
+    {
+      "id": "rejection",
+      "x": 512,
+      "y": 412,
+      "w": 256,
+      "h": 132,
+      "fill": "#EDEDED",
+      "stroke": "#5E5E5E",
+      "lines": [
+        "Non-promotion path",
+        "artifacts can stay project-local",
+        "without entering shared memory"
+      ]
+    },
+    {
+      "id": "curated",
+      "x": 940,
+      "y": 208,
+      "w": 256,
+      "h": 146,
+      "fill": "#E4F0FA",
+      "stroke": "#2E6DA4",
+      "lines": [
+        "Curated learnings",
+        "patterns",
+        "templates",
+        "reviewed cross-project guidance"
+      ]
+    },
+    {
+      "id": "consumer_rule",
+      "x": 940,
+      "y": 430,
+      "w": 256,
+      "h": 132,
+      "fill": "#EAF4EC",
+      "stroke": "#3B7A57",
+      "lines": [
+        "Consumer rule",
+        "projects read curated learnings",
+        "but do not write them directly"
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "x1": 340,
+      "y1": 248,
+      "x2": 512,
+      "y2": 274,
+      "label": "candidate for promotion",
+      "label_dx": 6,
+      "label_dy": -18
+    },
+    {
+      "x1": 340,
+      "y1": 472,
+      "x2": 512,
+      "y2": 478,
+      "label": "retain provenance",
+      "label_dx": 10,
+      "label_dy": -16
+    },
+    {
+      "x1": 768,
+      "y1": 274,
+      "x2": 940,
+      "y2": 281,
+      "label": "approve and promote",
+      "label_dx": 6,
+      "label_dy": -18
+    },
+    {
+      "x1": 768,
+      "y1": 478,
+      "x2": 940,
+      "y2": 496,
+      "label": "do not promote",
+      "label_dx": 10,
+      "label_dy": -18
+    },
+    {
+      "x1": 1068,
+      "y1": 354,
+      "x2": 1068,
+      "y2": 430,
+      "label": "shared read-only use",
+      "label_dx": 82
+    }
+  ],
+  "notes": [
+    {
+      "x": 108,
+      "y": 714,
+      "w": 1060,
+      "h": 70,
+      "fill": "#FFFDF7",
+      "stroke": "#AA9A6A",
+      "dasharray": "8 6",
+      "lines": [
+        "Design rule",
+        "The source of truth stays in text artifacts. Promotion is explicit. Shared memory quality comes from review rather than direct project writes."
+      ]
+    }
+  ]
+}

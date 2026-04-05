@@ -9,19 +9,21 @@ The architecture has three explicit zones:
 - optional automation plus rebuildable derived state
 
 ## Public Diagram Status
-The public branch intentionally does not publish a single overview SVG right now.
+The public branch intentionally does not publish a single overview SVG.
 
 Reason:
 - the previous single-view diagram was not coherent enough to carry the public architecture story cleanly
 - this system is easier to explain through multiple focused views than through one overloaded summary diagram
 
-Current rule for public `main`:
-- the text in this document is the current public architecture source of truth
-- public diagrams should return only when there is a coherent multi-view set
-- those future views should separate:
-  - repo-local integration
-  - canonical text artifacts
-  - automation and rebuildable state
+Current public rule:
+- this document is the narrative architecture source of truth
+- the diagram set complements this document with three generated focused views
+- the public verifier checks that those generated views are current
+
+Published public views:
+1. `docs/diagrams/repo-local-integration.svg`
+2. `docs/diagrams/canonical-artifacts-and-promotion-flow.svg`
+3. `docs/diagrams/automation-and-rebuildable-state.svg`
 
 ## Zones
 
@@ -64,10 +66,10 @@ Lookup performance uses rebuildable derived state:
 
 This state exists to make the text corpus usable quickly. It is not the source of truth.
 
-## Planned Public Diagram Set
-When public diagrams return, they should be published as multiple focused views rather than one flattened overview.
+## Public Diagram Set
+The public diagram set is intentionally split into focused views rather than one flattened overview.
 
-Expected views:
+Published views:
 1. repo-local integration view
 2. canonical artifact and promotion-flow view
 3. automation and rebuildable-state view

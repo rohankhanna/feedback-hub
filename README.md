@@ -4,7 +4,9 @@
 `feedback-hub` is a local cross-project learning memory for software projects. Each project keeps its own raw feedback in a project-owned area. Reusable lessons, decisions, and patterns can be curated into a shared learnings corpus.
 
 ## Status
-This is an internal-first tool being prepared for a public-safe `main` branch.
+This is the public-safe `main` branch for an internal-first tool.
+
+The public shell is usable now and includes a generated multi-view architecture diagram set.
 
 The public shell is intended to be:
 - standalone
@@ -85,9 +87,9 @@ learnings --help
 - backend setup: `docs/backend-setup.md`
 
 Current public note:
-- the public architecture description is text-first for now
-- the previous single-view SVG was removed because it was not coherent enough to publish
-- future public diagrams should return as multiple focused views rather than one overloaded sketch
+- the public branch now publishes three focused architecture views instead of one overloaded overview
+- each view is generated from version-controlled source under `docs/diagrams/`
+- the text architecture doc remains the narrative source of truth around those views
 
 ## Authorship And Provenance
 - This project is human-led and human-stewarded, with AI assistance used where useful in design, implementation, editing, and review.
@@ -107,3 +109,10 @@ Current public note:
 - configure an automation backend only after the standalone shell is working locally
 
 Backend setup is configurable by the user. This public shell does not assume any specific LLM CLI or API is already installed or prewired.
+
+## Project Policy Files
+- license: `LICENSE`
+- contributing: `CONTRIBUTING.md`
+- security reporting: `SECURITY.md`
+- code ownership: `CODEOWNERS`
+- community conduct: `CODE_OF_CONDUCT.md`

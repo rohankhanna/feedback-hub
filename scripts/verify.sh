@@ -32,9 +32,27 @@ if [ -f docs/architecture.svg ] || [ -f docs/architecture.diagram.json ]; then
   echo "Error: public main should not ship the deprecated single-view architecture diagram surface." >&2
   exit 1
 fi
+./scripts/render_architecture.sh --check >/dev/null
 
 echo "[4/5] required public docs"
-for path in README.md docs/architecture.md docs/governance.md docs/operations.md; do
+for path in \
+  README.md \
+  LICENSE \
+  CONTRIBUTING.md \
+  CODEOWNERS \
+  SECURITY.md \
+  CODE_OF_CONDUCT.md \
+  docs/architecture.md \
+  docs/governance.md \
+  docs/operations.md \
+  docs/backend-setup.md \
+  docs/diagrams/repo-local-integration.diagram.json \
+  docs/diagrams/repo-local-integration.svg \
+  docs/diagrams/canonical-artifacts-and-promotion-flow.diagram.json \
+  docs/diagrams/canonical-artifacts-and-promotion-flow.svg \
+  docs/diagrams/automation-and-rebuildable-state.diagram.json \
+  docs/diagrams/automation-and-rebuildable-state.svg \
+  scripts/render_architecture.sh; do
   if [ ! -f "${path}" ]; then
     echo "Error: required file missing: ${path}" >&2
     exit 1

@@ -1,0 +1,178 @@
+{
+  "title": "feedback-hub public architecture: automation and rebuildable state",
+  "description": "Optional automation can review changed feedback batches, while lookup speed comes from rebuildable derived state rather than hidden canonical data stores.",
+  "width": 1320,
+  "height": 860,
+  "groups": [
+    {
+      "x": 40,
+      "y": 104,
+      "w": 368,
+      "h": 590,
+      "label": "Optional automation",
+      "subtitle": "manual local use still works without this layer"
+    },
+    {
+      "x": 476,
+      "y": 104,
+      "w": 368,
+      "h": 590,
+      "label": "Canonical text corpus",
+      "subtitle": "feedback and curated learnings remain the source of truth"
+    },
+    {
+      "x": 912,
+      "y": 104,
+      "w": 368,
+      "h": 590,
+      "label": "Rebuildable derived state",
+      "subtitle": "fast lookup and usage signals built from text artifacts"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "scheduler",
+      "x": 88,
+      "y": 176,
+      "w": 272,
+      "h": 116,
+      "fill": "#F5F0E6",
+      "stroke": "#7E6A3D",
+      "lines": [
+        "Scheduler",
+        "optional sync cadence",
+        "runs separately from manual use"
+      ]
+    },
+    {
+      "id": "backend",
+      "x": 88,
+      "y": 376,
+      "w": 272,
+      "h": 132,
+      "fill": "#F8E6EF",
+      "stroke": "#8E3B6F",
+      "lines": [
+        "Backend adapter",
+        "user-configured LLM CLI or API",
+        "replaceable by a thin contract"
+      ]
+    },
+    {
+      "id": "text_corpus",
+      "x": 524,
+      "y": 248,
+      "w": 272,
+      "h": 140,
+      "fill": "#FFF2D9",
+      "stroke": "#9D6C00",
+      "lines": [
+        "Canonical text corpus",
+        "project feedback plus curated learnings",
+        "the source of truth for rebuilds"
+      ]
+    },
+    {
+      "id": "promotion_output",
+      "x": 524,
+      "y": 470,
+      "w": 272,
+      "h": 118,
+      "fill": "#EAF4EC",
+      "stroke": "#3B7A57",
+      "lines": [
+        "Promotion instructions",
+        "promote, defer, or no-op",
+        "applied back to the text corpus"
+      ]
+    },
+    {
+      "id": "derived_state",
+      "x": 960,
+      "y": 208,
+      "w": 272,
+      "h": 150,
+      "fill": "#EDEDED",
+      "stroke": "#5E5E5E",
+      "lines": [
+        "Derived state",
+        "SQLite index",
+        "profiles and usage signals",
+        "rebuildable from text artifacts"
+      ]
+    },
+    {
+      "id": "lookup",
+      "x": 960,
+      "y": 452,
+      "w": 272,
+      "h": 126,
+      "fill": "#E4F0FA",
+      "stroke": "#2E6DA4",
+      "lines": [
+        "Lookup surfaces",
+        "search, recommend, related",
+        "fast local consultation"
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "x1": 224,
+      "y1": 292,
+      "x2": 224,
+      "y2": 376,
+      "label": "invoke backend",
+      "label_dx": 74
+    },
+    {
+      "x1": 360,
+      "y1": 442,
+      "x2": 524,
+      "y2": 529,
+      "label": "emit review output",
+      "label_dx": 0,
+      "label_dy": -20
+    },
+    {
+      "x1": 660,
+      "y1": 388,
+      "x2": 660,
+      "y2": 470,
+      "label": "review changed batches",
+      "label_dx": 96
+    },
+    {
+      "x1": 796,
+      "y1": 318,
+      "x2": 960,
+      "y2": 283,
+      "label": "rebuild index and profiles",
+      "label_dx": 20,
+      "label_dy": -16
+    },
+    {
+      "x1": 1096,
+      "y1": 358,
+      "x2": 1096,
+      "y2": 452,
+      "label": "serve local lookup",
+      "label_dx": 82
+    }
+  ],
+  "notes": [
+    {
+      "x": 108,
+      "y": 730,
+      "w": 1104,
+      "h": 88,
+      "fill": "#FFFDF7",
+      "stroke": "#AA9A6A",
+      "dasharray": "8 6",
+      "lines": [
+        "Design rule",
+        "Automation is optional and replaceable. Derived state improves usability but can be rebuilt; it is never the canonical source of project knowledge."
+      ]
+    }
+  ]
+}

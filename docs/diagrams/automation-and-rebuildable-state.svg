@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1320" height="860" viewBox="0 0 1320 860" role="img" aria-labelledby="title desc">
+  <title id="title">feedback-hub public architecture: automation and rebuildable state</title>
+  <desc id="desc">Optional automation can review changed feedback batches, while lookup speed comes from rebuildable derived state rather than hidden canonical data stores.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#4A4A4A" />
+    </marker>
+    <filter id="card-shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#000000" flood-opacity="0.08" />
+    </filter>
+  </defs>
+  <rect x="0" y="0" width="1320" height="860" fill="#F7F4EE" />
+  <text x="32" y="46" font-family="Helvetica, Arial, sans-serif" font-size="32" font-weight="700" fill="#1F1F1F">feedback-hub public architecture: automation and rebuildable state</text>
+  <text x="32" y="76" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#5A5A5A">Optional automation can review changed feedback batches, while lookup speed comes from rebuildable derived state rather than hidden canonical data stores.</text>
+  <rect x="40" y="104" width="368" height="590" rx="24" fill="#FFFFFF" stroke="#D1CCC1" stroke-width="1.5" filter="url(#card-shadow)" />
+  <text x="64" y="138" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="700" fill="#393939">Optional automation</text>
+  <text x="64" y="162" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#6A6A6A">manual local use still works without this layer</text>
+  <rect x="476" y="104" width="368" height="590" rx="24" fill="#FFFFFF" stroke="#D1CCC1" stroke-width="1.5" filter="url(#card-shadow)" />
+  <text x="500" y="138" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="700" fill="#393939">Canonical text corpus</text>
+  <text x="500" y="162" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#6A6A6A">feedback and curated learnings remain the source of truth</text>
+  <rect x="912" y="104" width="368" height="590" rx="24" fill="#FFFFFF" stroke="#D1CCC1" stroke-width="1.5" filter="url(#card-shadow)" />
+  <text x="936" y="138" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="700" fill="#393939">Rebuildable derived state</text>
+  <text x="936" y="162" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#6A6A6A">fast lookup and usage signals built from text artifacts</text>
+  <line x1="224" y1="292" x2="224" y2="376" stroke="#4A4A4A" stroke-width="2.5" marker-end="url(#arrow)" />
+  <rect x="237" y="309" width="122" height="24" rx="12" fill="#FBFBFB" stroke="#E2DED6" stroke-width="1" />
+  <text x="298" y="326" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#333333">invoke backend</text>
+  <line x1="360" y1="442" x2="524" y2="529" stroke="#4A4A4A" stroke-width="2.5" marker-end="url(#arrow)" />
+  <rect x="367" y="440" width="150" height="24" rx="12" fill="#FBFBFB" stroke="#E2DED6" stroke-width="1" />
+  <text x="442" y="457" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#333333">emit review output</text>
+  <line x1="660" y1="388" x2="660" y2="470" stroke="#4A4A4A" stroke-width="2.5" marker-end="url(#arrow)" />
+  <rect x="667" y="404" width="178" height="24" rx="12" fill="#FBFBFB" stroke="#E2DED6" stroke-width="1" />
+  <text x="756" y="421" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#333333">review changed batches</text>
+  <line x1="796" y1="318" x2="960" y2="283" stroke="#4A4A4A" stroke-width="2.5" marker-end="url(#arrow)" />
+  <rect x="795" y="259" width="206" height="24" rx="12" fill="#FBFBFB" stroke="#E2DED6" stroke-width="1" />
+  <text x="898" y="276" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#333333">rebuild index and profiles</text>
+  <line x1="1096" y1="358" x2="1096" y2="452" stroke="#4A4A4A" stroke-width="2.5" marker-end="url(#arrow)" />
+  <rect x="1103" y="380" width="150" height="24" rx="12" fill="#FBFBFB" stroke="#E2DED6" stroke-width="1" />
+  <text x="1178" y="397" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#333333">serve local lookup</text>
+  <rect x="88" y="176" width="272" height="116" rx="20" fill="#F5F0E6" stroke="#7E6A3D" stroke-width="2.5" filter="url(#card-shadow)" />
+  <text x="224" y="212" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" fill="#1F1F1F">
+    <tspan x="224" dy="0" font-size="18" font-weight="700">Scheduler</tspan>
+    <tspan x="224" dy="24" font-size="16" font-weight="400">optional sync cadence</tspan>
+    <tspan x="224" dy="24" font-size="16" font-weight="400">runs separately from manual use</tspan>
+  </text>
+  <rect x="88" y="376" width="272" height="132" rx="20" fill="#F8E6EF" stroke="#8E3B6F" stroke-width="2.5" filter="url(#card-shadow)" />
+  <text x="224" y="412" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" fill="#1F1F1F">
+    <tspan x="224" dy="0" font-size="18" font-weight="700">Backend adapter</tspan>
+    <tspan x="224" dy="24" font-size="16" font-weight="400">user-configured LLM CLI or API</tspan>
+    <tspan x="224" dy="24" font-size="16" font-weight="400">replaceable by a thin contract</tspan>
+  </text>
+  <rect x="524" y="248" width="272" height="140" rx="20" fill="#FFF2D9" stroke="#9D6C00" stroke-width="2.5" filter="url(#card-shadow)" />
+  <text x="660" y="284" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" fill="#1F1F1F">
+    <tspan x="660" dy="0" font-size="18" font-weight="700">Canonical text corpus</tspan>
+    <tspan x="660" dy="24" font-size="16" font-weight="400">project feedback plus curated learnings</tspan>
+    <tspan x="660" dy="24" font-size="16" font-weight="400">the source of truth for rebuilds</tspan>
+  </text>
+  <rect x="524" y="470" width="272" height="118" rx="20" fill="#EAF4EC" stroke="#3B7A57" stroke-width="2.5" filter="url(#card-shadow)" />
+  <text x="660" y="506" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" fill="#1F1F1F">
+    <tspan x="660" dy="0" font-size="18" font-weight="700">Promotion instructions</tspan>
+    <tspan x="660" dy="24" font-size="16" font-weight="400">promote, defer, or no-op</tspan>
+    <tspan x="660" dy="24" font-size="16" font-weight="400">applied back to the text corpus</tspan>
+  </text>
+  <rect x="960" y="208" width="272" height="150" rx="20" fill="#EDEDED" stroke="#5E5E5E" stroke-width="2.5" filter="url(#card-shadow)" />
+  <text x="1096" y="244" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" fill="#1F1F1F">
+    <tspan x="1096" dy="0" font-size="18" font-weight="700">Derived state</tspan>
+    <tspan x="1096" dy="24" font-size="16" font-weight="400">SQLite index</tspan>
+    <tspan x="1096" dy="24" font-size="16" font-weight="400">profiles and usage signals</tspan>
+    <tspan x="1096" dy="24" font-size="16" font-weight="400">rebuildable from text artifacts</tspan>
+  </text>
+  <rect x="960" y="452" width="272" height="126" rx="20" fill="#E4F0FA" stroke="#2E6DA4" stroke-width="2.5" filter="url(#card-shadow)" />
+  <text x="1096" y="488" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" fill="#1F1F1F">
+    <tspan x="1096" dy="0" font-size="18" font-weight="700">Lookup surfaces</tspan>
+    <tspan x="1096" dy="24" font-size="16" font-weight="400">search, recommend, related</tspan>
+    <tspan x="1096" dy="24" font-size="16" font-weight="400">fast local consultation</tspan>
+  </text>
+  <rect x="108" y="730" width="1104" height="88" rx="20" fill="#FFFDF7" stroke="#AA9A6A" stroke-width="2" stroke-dasharray="8 6" />
+  <text x="132" y="762" font-family="Helvetica, Arial, sans-serif" fill="#2B2B2B">
+    <tspan x="132" dy="0" font-size="18" font-weight="700">Design rule</tspan>
+    <tspan x="132" dy="24" font-size="16" font-weight="400">Automation is optional and replaceable. Derived state improves usability but can be rebuilt; it is never the canonical source of project knowledge.</tspan>
+  </text>
+</svg>

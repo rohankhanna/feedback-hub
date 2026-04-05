@@ -1,0 +1,173 @@
+{
+  "title": "feedback-hub public architecture: repo-local integration",
+  "description": "How an integrated project repo sees feedback-hub locally through project-owned feedback, shared learnings, and the two CLI surfaces.",
+  "width": 1260,
+  "height": 780,
+  "groups": [
+    {
+      "x": 36,
+      "y": 104,
+      "w": 1188,
+      "h": 532,
+      "label": "Integrated project repo",
+      "subtitle": "the public shell is meant to feel local inside a normal repository"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "repo",
+      "x": 82,
+      "y": 168,
+      "w": 320,
+      "h": 122,
+      "fill": "#EAF4EC",
+      "stroke": "#3B7A57",
+      "lines": [
+        "Developer working tree",
+        "normal project repository",
+        "feedback-hub adds local entrypoints"
+      ]
+    },
+    {
+      "id": "feedback_path",
+      "x": 82,
+      "y": 370,
+      "w": 220,
+      "h": 120,
+      "fill": "#FFF2D9",
+      "stroke": "#9D6C00",
+      "lines": [
+        "feedback/",
+        "project-owned raw write surface",
+        "lessons, decisions, incidents"
+      ]
+    },
+    {
+      "id": "learnings_path",
+      "x": 360,
+      "y": 370,
+      "w": 220,
+      "h": 120,
+      "fill": "#E4F0FA",
+      "stroke": "#2E6DA4",
+      "lines": [
+        "learnings/",
+        "shared read-only lookup surface",
+        "curated cross-project memory"
+      ]
+    },
+    {
+      "id": "feedback_cli",
+      "x": 676,
+      "y": 188,
+      "w": 232,
+      "h": 126,
+      "fill": "#F8E6EF",
+      "stroke": "#8E3B6F",
+      "lines": [
+        "feedback CLI",
+        "apply integration",
+        "capture project feedback",
+        "inspect repo status"
+      ]
+    },
+    {
+      "id": "learnings_cli",
+      "x": 958,
+      "y": 188,
+      "w": 218,
+      "h": 126,
+      "fill": "#E7F2F8",
+      "stroke": "#2F6F91",
+      "lines": [
+        "learnings CLI",
+        "index, search, recommend",
+        "show related guidance",
+        "record adopt or defer outcomes"
+      ]
+    },
+    {
+      "id": "workflow",
+      "x": 676,
+      "y": 384,
+      "w": 500,
+      "h": 120,
+      "fill": "#F5F0E6",
+      "stroke": "#7E6A3D",
+      "lines": [
+        "Typical local workflow",
+        "apply repo integration, capture raw feedback, rebuild the index,",
+        "then search or recommend curated learnings before substantive work"
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "x1": 242,
+      "y1": 290,
+      "x2": 192,
+      "y2": 370,
+      "label": "project writes here",
+      "label_dx": -18
+    },
+    {
+      "x1": 242,
+      "y1": 290,
+      "x2": 470,
+      "y2": 370,
+      "label": "project reads here",
+      "label_dx": 24
+    },
+    {
+      "x1": 402,
+      "y1": 230,
+      "x2": 676,
+      "y2": 250,
+      "label": "use feedback commands",
+      "label_dx": 10,
+      "label_dy": -10
+    },
+    {
+      "x1": 402,
+      "y1": 240,
+      "x2": 958,
+      "y2": 250,
+      "label": "use learnings commands",
+      "label_dx": 24,
+      "label_dy": 18
+    },
+    {
+      "x1": 302,
+      "y1": 430,
+      "x2": 676,
+      "y2": 444,
+      "label": "capture and inspect",
+      "label_dx": 0,
+      "label_dy": -16
+    },
+    {
+      "x1": 580,
+      "y1": 430,
+      "x2": 676,
+      "y2": 444,
+      "label": "consult shared memory",
+      "label_dx": 48,
+      "label_dy": 26
+    }
+  ],
+  "notes": [
+    {
+      "x": 84,
+      "y": 676,
+      "w": 1092,
+      "h": 72,
+      "fill": "#FFFDF7",
+      "stroke": "#AA9A6A",
+      "dasharray": "8 6",
+      "lines": [
+        "Boundary rule",
+        "Projects write raw feedback but do not write curated learnings directly. The public shell stays local-first and standalone."
+      ]
+    }
+  ]
+}
