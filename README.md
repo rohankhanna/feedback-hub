@@ -4,15 +4,7 @@
 `feedback-hub` is a local cross-project learning memory for software projects. Each project keeps its own raw feedback in a project-owned area. Reusable lessons, decisions, and patterns can be curated into a shared learnings corpus.
 
 ## Status
-This is the public-safe `main` branch for an internal-first tool.
-
-The public shell is usable now and includes a generated multi-view architecture diagram set.
-
-The public shell is intended to be:
-- standalone
-- local-first
-- provider-agnostic at the shell level
-- usable without the private support stack used on the internal branch
+`feedback-hub` is a standalone, local-first CLI for feedback capture, curated learnings lookup, and optional automated curation.
 
 ## What It Provides
 - repo-local project integration through `feedback`
@@ -86,16 +78,7 @@ learnings --help
 - governance: `docs/governance.md`
 - backend setup: `docs/backend-setup.md`
 
-Current public note:
-- the public branch now publishes three focused architecture views instead of one overloaded overview
-- each view is generated from version-controlled source under `docs/diagrams/`
-- the text architecture doc remains the narrative source of truth around those views
-
-## Authorship And Provenance
-- This project is human-led and human-stewarded, with AI assistance used where useful in design, implementation, editing, and review.
-- Public-bound changes should be classifiable as `human-authored`, `ai-assisted`, or `ai-drafted-human-reviewed`.
-- Public `main` should contain only human-reviewed work.
-- Human maintainers remain responsible for review, acceptance, integration, verification, publication, and public claims about the work.
+Architecture is documented through three focused generated views under `docs/diagrams/`, with `docs/architecture.md` as the narrative source of truth.
 
 ## Current Scope
 - local development environments
@@ -108,7 +91,7 @@ Current public note:
 - review the docs listed above
 - configure an automation backend only after the standalone shell is working locally
 
-Backend setup is configurable by the user. This public shell does not assume any specific LLM CLI or API is already installed or prewired.
+Backend setup is configurable by the user. This repo does not assume any specific LLM CLI or API is already installed or prewired.
 
 ## Project Policy Files
 - license: `LICENSE`

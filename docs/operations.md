@@ -5,7 +5,7 @@
 - `feedback` for project integration and project-owned feedback capture
 - `learnings` for indexing, search, recommendation, and curated learnings operations
 
-This document describes standalone operation of this repository without assuming any private support stack.
+This document describes standalone operation of this repository with standard local prerequisites.
 
 ## Prerequisites
 - `bash`

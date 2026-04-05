@@ -25,11 +25,3 @@ Curated changes should be traceable back to their originating project feedback a
 ## Public Shell Rule
 The public shell describes the governance model generically.
 It does not expose private project inventory or internal operating detail.
-
-## Public Disclosure
-Public disclosure in this repo lives in the public-facing docs rather than a dedicated `AUTHORSHIP.md` file on `main`.
-
-That disclosure must still cover:
-- human stewardship
-- AI assistance where material
-- the rule that public-bound work is human-reviewed before publication
