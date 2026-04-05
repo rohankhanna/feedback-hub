@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck disable=SC1091
+source "${SCRIPT_DIR}/lib/common.sh"
+
 if [ "$#" -ne 1 ]; then
   echo "Usage: $0 <project_name>" >&2
   exit 1
@@ -13,10 +17,10 @@ if [[ ! "$PROJECT_NAME" =~ ^[a-zA-Z0-9._-]+$ ]]; then
   exit 1
 fi
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
-FEEDBACK_DIR="${REPO_ROOT}/projects/${PROJECT_NAME}/feedback"
+FEEDBACK_DIR="$(feedback_project_feedback_dir "${PROJECT_NAME}")"
+LEARNINGS_DIR="$(feedback_learnings_dir)"
 
+feedback_mkdir_if_missing "${LEARNINGS_DIR}"
 mkdir -p \
   "${FEEDBACK_DIR}/incoming" \
   "${FEEDBACK_DIR}/outgoing" \
@@ -27,6 +31,6 @@ mkdir -p \
 echo "Project registered: ${PROJECT_NAME}"
 echo "Created: ${FEEDBACK_DIR}/{incoming,outgoing,decisions,incidents,lessons}"
 echo
-echo "To link a project repo manually:"
-echo "  ln -sfn <feedback_hub_repo>/projects/${PROJECT_NAME}/feedback <project_repo>/feedback"
-echo "  ln -sfn <feedback_hub_repo>/learnings <project_repo>/learnings"
+echo "Run feedback apply inside the target project repo to link:"
+echo "  feedback -> ${FEEDBACK_DIR}"
+echo "  learnings -> ${LEARNINGS_DIR}"

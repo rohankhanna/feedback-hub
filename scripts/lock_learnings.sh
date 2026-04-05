@@ -2,8 +2,9 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
-LEARNINGS_DIR="${REPO_ROOT}/learnings"
+# shellcheck disable=SC1091
+source "${SCRIPT_DIR}/lib/common.sh"
+LEARNINGS_DIR="$(feedback_learnings_dir)"
 
 usage() {
   cat <<'USAGE'

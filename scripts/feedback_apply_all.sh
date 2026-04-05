@@ -7,9 +7,10 @@ if [ "$#" -gt 1 ]; then
 fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+# shellcheck disable=SC1091
+source "${SCRIPT_DIR}/lib/common.sh"
 DESKTOP_ROOT="${1:-${FEEDBACK_DESKTOP_ROOT:-${HOME}/Desktop}}"
-LOCK_ROOT="${REPO_ROOT}/.state/update-all"
+LOCK_ROOT="$(feedback_state_dir)/update-all"
 LOCK_DIR="${LOCK_ROOT}/.lock"
 
 if [ ! -d "${DESKTOP_ROOT}" ]; then
@@ -30,7 +31,7 @@ trap release_lock EXIT
 
 TMP_LIST="$(mktemp)"
 {
-  find "${REPO_ROOT}/projects" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' \
+  find "$(feedback_projects_dir)" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' \
     | while IFS= read -r project_name; do
         repo_dir="${DESKTOP_ROOT}/${project_name}"
         if [ -d "${repo_dir}" ]; then

@@ -20,8 +20,90 @@ FEEDBACK_LIB_DIR="$(cd "$(dirname "${FEEDBACK_LIB_SELF}")" && pwd)"
 FEEDBACK_SCRIPT_DIR="$(cd "${FEEDBACK_LIB_DIR}/.." && pwd)"
 FEEDBACK_REPO_ROOT="$(cd "${FEEDBACK_SCRIPT_DIR}/.." && pwd)"
 
+feedback_abs_path() {
+  local path="$1"
+  (cd "${path}" && pwd)
+}
+
+feedback_abs_path_maybe_missing() {
+  local path="$1"
+  local parent_dir
+  local base_name
+
+  if [ -d "${path}" ] || [ -L "${path}" ]; then
+    feedback_abs_path "${path}"
+    return 0
+  fi
+
+  parent_dir="$(feedback_abs_path "$(dirname "${path}")")"
+  base_name="$(basename "${path}")"
+  printf '%s/%s\n' "${parent_dir}" "${base_name}"
+}
+
+feedback_derive_data_root_from_local_links() {
+  local resolved_link
+
+  resolved_link="$(readlink -f "${FEEDBACK_REPO_ROOT}/learnings" 2>/dev/null || true)"
+  case "${resolved_link}" in
+    */learnings)
+      feedback_abs_path "${resolved_link}/.."
+      return 0
+      ;;
+  esac
+
+  resolved_link="$(readlink -f "${FEEDBACK_REPO_ROOT}/projects" 2>/dev/null || true)"
+  case "${resolved_link}" in
+    */projects)
+      feedback_abs_path "${resolved_link}/.."
+      return 0
+      ;;
+  esac
+
+  resolved_link="$(readlink -f "${FEEDBACK_REPO_ROOT}/.state" 2>/dev/null || true)"
+  case "${resolved_link}" in
+    */.state)
+      feedback_abs_path "${resolved_link}/.."
+      return 0
+      ;;
+  esac
+
+  resolved_link="$(readlink -f "${FEEDBACK_REPO_ROOT}/feedback" 2>/dev/null || true)"
+  case "${resolved_link}" in
+    */projects/*/feedback)
+      feedback_abs_path "${resolved_link}/../../.."
+      return 0
+      ;;
+  esac
+
+  return 1
+}
+
+feedback_default_data_root() {
+  local configured_root="${FEEDBACK_DATA_ROOT:-${FEEDBACK_RUNTIME_ROOT:-}}"
+  local derived_root
+
+  if [ -n "${configured_root}" ]; then
+    feedback_abs_path_maybe_missing "${configured_root}"
+    return 0
+  fi
+
+  derived_root="$(feedback_derive_data_root_from_local_links 2>/dev/null || true)"
+  if [ -n "${derived_root}" ]; then
+    printf '%s\n' "${derived_root}"
+    return 0
+  fi
+
+  printf '%s\n' "${FEEDBACK_REPO_ROOT}"
+}
+
+FEEDBACK_DATA_ROOT="$(feedback_default_data_root)"
+
 feedback_repo_root() {
   printf '%s\n' "${FEEDBACK_REPO_ROOT}"
+}
+
+feedback_data_root() {
+  printf '%s\n' "${FEEDBACK_DATA_ROOT}"
 }
 
 feedback_script_dir() {
@@ -55,11 +137,6 @@ feedback_sha256_file() {
   sha256sum "${file_path}" | awk '{print $1}'
 }
 
-feedback_abs_path() {
-  local path="$1"
-  (cd "${path}" && pwd)
-}
-
 feedback_resolve_project_path() {
   local project_repo_path="${1:-$(pwd)}"
 
@@ -86,21 +163,25 @@ feedback_project_name_from_path() {
 
 feedback_project_feedback_dir() {
   local project_name="$1"
-  printf '%s/projects/%s/feedback\n' "${FEEDBACK_REPO_ROOT}" "${project_name}"
+  printf '%s/projects/%s/feedback\n' "${FEEDBACK_DATA_ROOT}" "${project_name}"
 }
 
 feedback_project_feedback_subdir() {
   local project_name="$1"
   local kind="$2"
-  printf '%s/projects/%s/feedback/%s\n' "${FEEDBACK_REPO_ROOT}" "${project_name}" "${kind}"
+  printf '%s/projects/%s/feedback/%s\n' "${FEEDBACK_DATA_ROOT}" "${project_name}" "${kind}"
+}
+
+feedback_projects_dir() {
+  printf '%s/projects\n' "${FEEDBACK_DATA_ROOT}"
 }
 
 feedback_learnings_dir() {
-  printf '%s/learnings\n' "${FEEDBACK_REPO_ROOT}"
+  printf '%s/learnings\n' "${FEEDBACK_DATA_ROOT}"
 }
 
 feedback_state_dir() {
-  printf '%s/.state\n' "${FEEDBACK_REPO_ROOT}"
+  printf '%s/.state\n' "${FEEDBACK_DATA_ROOT}"
 }
 
 feedback_json_bool() {

@@ -47,6 +47,7 @@ feedback_learnings_supersession_log_path() {
 }
 
 feedback_learnings_ensure_state_dirs() {
+  feedback_mkdir_if_missing "$(feedback_learnings_dir)"
   feedback_mkdir_if_missing "$(feedback_learnings_state_dir)"
   feedback_mkdir_if_missing "$(feedback_learnings_profiles_dir)"
   feedback_mkdir_if_missing "$(feedback_learnings_interactions_dir)"

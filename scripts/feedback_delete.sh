@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck disable=SC1091
+source "${SCRIPT_DIR}/lib/common.sh"
+
 usage() {
   cat <<'USAGE'
 Usage:
@@ -48,13 +52,8 @@ if [ ! -d "${PROJECT_REPO_PATH}" ]; then
   exit 1
 fi
 
-PROJECT_REPO_PATH="$(cd "${PROJECT_REPO_PATH}" && pwd)"
-PROJECT_NAME="$(basename "${PROJECT_REPO_PATH}")"
-
-if [[ ! "${PROJECT_NAME}" =~ ^[a-zA-Z0-9._-]+$ ]]; then
-  echo "Error: inferred project name '${PROJECT_NAME}' must match [a-zA-Z0-9._-]+" >&2
-  exit 1
-fi
+PROJECT_REPO_PATH="$(feedback_resolve_project_path "${PROJECT_REPO_PATH}")"
+PROJECT_NAME="$(feedback_project_name_from_path "${PROJECT_REPO_PATH}")"
 
 if [ "${PURGE_HUB_PROJECT}" = "true" ] && [ "${CONFIRMED}" != "true" ]; then
   echo "Error: --purge requires --yes." >&2
@@ -62,10 +61,8 @@ if [ "${PURGE_HUB_PROJECT}" = "true" ] && [ "${CONFIRMED}" != "true" ]; then
   exit 1
 fi
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
-HUB_FEEDBACK="${REPO_ROOT}/projects/${PROJECT_NAME}/feedback"
-HUB_LEARNINGS="${REPO_ROOT}/learnings"
+HUB_FEEDBACK="$(feedback_project_feedback_dir "${PROJECT_NAME}")"
+HUB_LEARNINGS="$(feedback_learnings_dir)"
 PROJECT_FEEDBACK_LINK="${PROJECT_REPO_PATH}/feedback"
 PROJECT_LEARNINGS_LINK="${PROJECT_REPO_PATH}/learnings"
 
@@ -103,7 +100,7 @@ remove_link_if_matches "${PROJECT_LEARNINGS_LINK}" "${HUB_LEARNINGS}" "learnings
 if [ "${PURGE_HUB_PROJECT}" = "true" ]; then
   if [ -d "${HUB_FEEDBACK}" ]; then
     rm -rf "${HUB_FEEDBACK}"
-    rmdir "${REPO_ROOT}/projects/${PROJECT_NAME}" 2>/dev/null || true
+    rmdir "$(feedback_projects_dir)/${PROJECT_NAME}" 2>/dev/null || true
     echo "Purged hub feedback directory: ${HUB_FEEDBACK}"
   else
     echo "No hub feedback directory found for ${PROJECT_NAME}."

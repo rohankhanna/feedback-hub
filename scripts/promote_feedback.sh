@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck disable=SC1091
+source "${SCRIPT_DIR}/lib/common.sh"
+
 usage() {
   cat <<'USAGE'
 Usage:
@@ -41,10 +45,8 @@ case "${DEST_SUBDIR}" in
     ;;
 esac
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
-SOURCE_PATH="${REPO_ROOT}/projects/${PROJECT_NAME}/feedback/${SOURCE_REL}"
-DEST_DIR="${REPO_ROOT}/learnings/${DEST_SUBDIR}"
+SOURCE_PATH="$(feedback_project_feedback_dir "${PROJECT_NAME}")/${SOURCE_REL}"
+DEST_DIR="$(feedback_learnings_dir)/${DEST_SUBDIR}"
 
 if [ ! -e "${SOURCE_PATH}" ]; then
   echo "Error: source artifact not found: ${SOURCE_PATH}" >&2
@@ -75,8 +77,8 @@ else
   mv "${SOURCE_PATH}" "${TARGET_PATH}"
 fi
 
-LOG_FILE="${REPO_ROOT}/learnings/promotion-log.tsv"
-TARGET_REL="${TARGET_PATH#${REPO_ROOT}/}"
+LOG_FILE="$(feedback_learnings_dir)/promotion-log.tsv"
+TARGET_REL="${TARGET_PATH#$(feedback_data_root)/}"
 
 printf "%s\t%s\t%s\t%s\t%s\n" \
   "${TIMESTAMP}" \

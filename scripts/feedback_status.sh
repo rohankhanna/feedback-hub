@@ -47,6 +47,8 @@ PROJECT_FEEDBACK_LINK="${PROJECT_REPO_PATH}/feedback"
 PROJECT_LEARNINGS_LINK="${PROJECT_REPO_PATH}/learnings"
 AGENTS_FILE="${PROJECT_REPO_PATH}/AGENTS.md"
 GITIGNORE_FILE="${PROJECT_REPO_PATH}/.gitignore"
+HUB_FEEDBACK_REAL="$(feedback_readlink_real "${HUB_FEEDBACK}")"
+HUB_LEARNINGS_REAL="$(feedback_readlink_real "${HUB_LEARNINGS}")"
 
 feedback_link_ok="false"
 learnings_link_ok="false"
@@ -54,13 +56,11 @@ managed_block_present="false"
 gitignore_feedback="false"
 gitignore_learnings="false"
 
-if [ -L "${PROJECT_FEEDBACK_LINK}" ] && [ "$(feedback_readlink_real "${PROJECT_FEEDBACK_LINK}")" = "$(feedback_readlink_real "${HUB_FEEDBACK}")" ]; then
+if [ -L "${PROJECT_FEEDBACK_LINK}" ] && [ -n "${HUB_FEEDBACK_REAL}" ] && [ "$(feedback_readlink_real "${PROJECT_FEEDBACK_LINK}")" = "${HUB_FEEDBACK_REAL}" ]; then
   feedback_link_ok="true"
 fi
 
-if [ "${PROJECT_REPO_PATH}" = "${FEEDBACK_REPO_ROOT}" ]; then
-  learnings_link_ok="true"
-elif [ -L "${PROJECT_LEARNINGS_LINK}" ] && [ "$(feedback_readlink_real "${PROJECT_LEARNINGS_LINK}")" = "$(feedback_readlink_real "${HUB_LEARNINGS}")" ]; then
+if [ -e "${PROJECT_LEARNINGS_LINK}" ] && [ -n "${HUB_LEARNINGS_REAL}" ] && [ "$(feedback_readlink_real "${PROJECT_LEARNINGS_LINK}")" = "${HUB_LEARNINGS_REAL}" ]; then
   learnings_link_ok="true"
 fi
 

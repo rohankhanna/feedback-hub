@@ -1,5 +1,7 @@
-.state/
+.state
 config/*.env
 feedback
+learnings
+projects
 last
 AGENTS.md.sha256

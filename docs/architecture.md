@@ -1,11 +1,11 @@
 # Architecture
 
 ## Overview
-`feedback-hub` separates repo-local project integration from hub-owned text artifacts and from rebuildable fast-lookup state.
+`feedback-hub` separates repo-local project integration from externally stored runtime text artifacts and from rebuildable fast-lookup state.
 
 The architecture has three explicit zones:
 - the project-facing shell used inside integrated repos
-- the hub-owned canonical text artifacts
+- the externally stored hub-owned canonical text artifacts
 - optional automation plus rebuildable derived state
 
 ## Public Diagram Status
@@ -40,6 +40,8 @@ This shell is where normal project work happens. It should feel local to the pro
 The hub owns two canonical text layers:
 - project feedback
 - curated learnings
+
+Those text layers are canonical runtime data, not committed repo content. The public repo ships the tool shell and docs; the live text corpus lives under the configured data root.
 
 Project feedback is the raw ingestion surface for:
 - lessons
@@ -89,3 +91,5 @@ Project integration gives a repo:
 - command surfaces for capture, indexing, search, and recommendation
 
 The public shell documents this generically and does not assume any private workstation layout.
+
+In a local checkout, those feedback/learnings/projects/state paths may be exposed as convenience symlinks, but they are local operator surfaces rather than tracked source content.

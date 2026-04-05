@@ -61,24 +61,24 @@ done
 
 echo "[5/5] smoke test"
 tmp_root="$(mktemp -d)"
+tmp_data_root="${tmp_root}/hub-data"
 project_name="feedback-hub-verify-smoke"
 project_repo="${tmp_root}/${project_name}"
-hub_project_dir="${REPO_ROOT}/projects/${project_name}"
 
 cleanup() {
   rm -rf "${tmp_root}"
-  rm -rf "${hub_project_dir}"
 }
 trap cleanup EXIT
 
+mkdir -p "${tmp_data_root}"
 mkdir -p "${project_repo}"
 git -C "${project_repo}" init -q
 printf '# %s\n' "${project_name}" > "${project_repo}/README.md"
 
-./scripts/feedback.sh apply "${project_repo}" >/dev/null
-./scripts/feedback.sh status "${project_repo}" --json >/dev/null
-./scripts/learnings.sh index --json >/dev/null
-./scripts/learnings.sh recommend "${project_repo}" --json >/dev/null
-./scripts/feedback.sh delete "${project_repo}" --purge --yes >/dev/null
+FEEDBACK_DATA_ROOT="${tmp_data_root}" ./scripts/feedback.sh apply "${project_repo}" >/dev/null
+FEEDBACK_DATA_ROOT="${tmp_data_root}" ./scripts/feedback.sh status "${project_repo}" --json >/dev/null
+FEEDBACK_DATA_ROOT="${tmp_data_root}" ./scripts/learnings.sh index --json >/dev/null
+FEEDBACK_DATA_ROOT="${tmp_data_root}" ./scripts/learnings.sh recommend "${project_repo}" --json >/dev/null
+FEEDBACK_DATA_ROOT="${tmp_data_root}" ./scripts/feedback.sh delete "${project_repo}" --purge --yes >/dev/null
 
 echo "Verification passed."

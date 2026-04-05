@@ -113,9 +113,16 @@ Provider-specific setup is intentionally left to user configuration rather than 
 See `docs/backend-setup.md` for the public backend contract and setup model.
 
 ## Data Model
-- project-owned feedback lives under `projects/<project_name>/feedback`
-- curated shared learnings live under `learnings/`
-- derived local state is rebuildable and should not be treated as the canonical knowledge base
+- runtime data root defaults to the live feedback-hub instance rather than the committed repo tree
+- project-owned feedback lives under `<data_root>/projects/<project_name>/feedback`
+- curated shared learnings live under `<data_root>/learnings/`
+- derived local state lives under `<data_root>/.state/`
+- local `feedback`, `projects`, `learnings`, and `.state` paths may exist as convenience symlinks, but they are local-only and not version-controlled content
+- commands can be pointed at an isolated disposable data root with:
+
+```bash
+FEEDBACK_DATA_ROOT=/tmp/feedback-hub-data ./scripts/feedback.sh status .
+```
 
 ## Verification
 Canonical verification path:

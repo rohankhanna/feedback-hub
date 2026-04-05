@@ -116,7 +116,7 @@ INDEXED_COUNT=0
 while IFS= read -r file_path; do
   [ -z "${file_path}" ] && continue
 
-  rel_path="${file_path#${FEEDBACK_REPO_ROOT}/}"
+  rel_path="${file_path#$(feedback_data_root)/}"
   learning_type="$(printf '%s' "${rel_path}" | cut -d'/' -f2)"
   IFS=$'\t' read -r learning_id summary evidence_strength adoption_cost <<< "$(feedback_extract_frontmatter_fields_tsv "${file_path}" id summary evidence_strength adoption_cost)"
   learning_id="$(feedback_trim "${learning_id}")"
@@ -245,7 +245,7 @@ VALUES (
   '$(feedback_escape_sql "${recorded_at}")'
 );
 SQL
-done < <(find "${FEEDBACK_REPO_ROOT}/projects" -type f -path '*/feedback/incoming/*.md' | sort)
+done < <(find "$(feedback_projects_dir)" -type f -path '*/feedback/incoming/*.md' | sort)
 
 while IFS= read -r usage_file; do
   [ -z "${usage_file}" ] && continue

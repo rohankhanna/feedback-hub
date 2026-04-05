@@ -76,7 +76,7 @@ if [ -z "${QUERY_RESULT}" ]; then
 fi
 
 IFS="${DB_SEPARATOR}" read -r id title path type summary status superseded_by last_validated_at source_project source_artifact tags_text facets_text <<< "${QUERY_RESULT}"
-ABS_PATH="${FEEDBACK_REPO_ROOT}/${path}"
+ABS_PATH="$(feedback_data_root)/${path}"
 USAGE_PROJECT_PATH="$(feedback_infer_usage_project_path "$(pwd)" 2>/dev/null || true)"
 if [ -n "${USAGE_PROJECT_PATH}" ]; then
   USAGE_PROJECT_NAME="$(feedback_project_name_from_path "${USAGE_PROJECT_PATH}")"
