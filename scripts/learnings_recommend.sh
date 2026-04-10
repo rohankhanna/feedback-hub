@@ -73,18 +73,16 @@ OUT_SEPARATOR=$'\x1e'
 sqlite3 -separator "${DB_SEPARATOR}" "$(feedback_learnings_db_path)" <<'SQL' > "${RAW_RESULTS}"
 SELECT
   e.id,
-  e.title,
+  REPLACE(REPLACE(e.title, char(10), ' '), char(13), ' '),
   e.path,
   e.type,
-  IFNULL(e.summary, ''),
+  REPLACE(REPLACE(IFNULL(e.summary, ''), char(10), ' '), char(13), ' '),
   IFNULL(e.updated_at, ''),
   IFNULL(e.last_validated_at, ''),
   IFNULL(e.evidence_strength, 0),
   IFNULL(e.adoption_cost, ''),
   IFNULL((SELECT group_concat(tag, ' ') FROM learning_tags WHERE learning_id = e.id), ''),
-  IFNULL((SELECT group_concat(facet_key || ':' || facet_value, ' ') FROM learning_facets WHERE learning_id = e.id), ''),
-  IFNULL(e.source_project, ''),
-  IFNULL(e.source_artifact, '')
+  IFNULL((SELECT group_concat(facet_key || ':' || facet_value, ' ') FROM learning_facets WHERE learning_id = e.id), '')
 FROM learning_entities e
 WHERE e.status = 'active'
 ORDER BY e.type, e.updated_at DESC;
@@ -92,8 +90,18 @@ SQL
 
 SCORED_RESULTS="$(mktemp)"
 
-while IFS="${DB_SEPARATOR}" read -r id title path type summary updated_at last_validated_at evidence_strength adoption_cost tags_text facets_text source_project source_artifact; do
+while IFS="${DB_SEPARATOR}" read -r id title path type summary updated_at last_validated_at evidence_strength adoption_cost tags_text facets_text; do
   [ -z "${id}" ] && continue
+
+  id="$(feedback_single_line "${id}")"
+  title="$(feedback_single_line "${title}")"
+  path="$(feedback_single_line "${path}")"
+  type="$(feedback_single_line "${type}")"
+  summary="$(feedback_single_line "${summary}")"
+  updated_at="$(feedback_single_line "${updated_at}")"
+  last_validated_at="$(feedback_single_line "${last_validated_at}")"
+  tags_text="$(feedback_single_line "${tags_text}")"
+  facets_text="$(feedback_single_line "${facets_text}")"
 
   text_blob="$(printf '%s %s %s %s' "${title}" "${summary}" "${tags_text}" "${facets_text}" | tr '[:upper:]' '[:lower:]')"
   matched_terms=()
@@ -176,14 +184,12 @@ while IFS="${DB_SEPARATOR}" read -r id title path type summary updated_at last_v
   [ "${#matched_terms[@]}" -gt 0 ] && reasons+=("lexical_match:${matched_terms[*]}")
   [ -n "${last_validated_at}" ] && reasons+=("validated:${last_validated_at}")
   [ "${#risk_reasons[@]}" -gt 0 ] && reasons+=("${risk_reasons[*]}")
-  [ -n "${source_project}" ] && reasons+=("source_project:${source_project}")
-
-  printf '%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s\n' \
+  printf '%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s\n' \
     "${final_score}" "${OUT_SEPARATOR}" "${id}" "${OUT_SEPARATOR}" "${title}" "${OUT_SEPARATOR}" \
     "${path}" "${OUT_SEPARATOR}" "${type}" "${OUT_SEPARATOR}" "${summary}" "${OUT_SEPARATOR}" \
     "${confidence}" "${OUT_SEPARATOR}" "${action}" "${OUT_SEPARATOR}" "${adoption_cost}" "${OUT_SEPARATOR}" \
-    "${source_project}" "${OUT_SEPARATOR}" "${source_artifact}" "${OUT_SEPARATOR}" "${reasons[*]:-}" "${OUT_SEPARATOR}" \
-    "${matched_terms[*]:-}" "${OUT_SEPARATOR}" "${matched_facets[*]:-}" >> "${SCORED_RESULTS}"
+    "$(feedback_single_line "${reasons[*]:-}")" "${OUT_SEPARATOR}" \
+    "$(feedback_single_line "${matched_terms[*]:-}")" "${OUT_SEPARATOR}" "$(feedback_single_line "${matched_facets[*]:-}")" >> "${SCORED_RESULTS}"
 done < "${RAW_RESULTS}"
 
 SORTED_RESULTS="$(mktemp)"
@@ -191,17 +197,17 @@ sort -t "${OUT_SEPARATOR}" -k1,1gr "${SCORED_RESULTS}" > "${SORTED_RESULTS}.all"
 
 declare -A TYPE_COUNTS=()
 SELECTED_RESULTS="$(mktemp)"
-while IFS="${OUT_SEPARATOR}" read -r score id title path type summary confidence action adoption_cost source_project source_artifact reasons matched_terms matched_facets; do
+while IFS="${OUT_SEPARATOR}" read -r score id title path type summary confidence action adoption_cost reasons matched_terms matched_facets; do
   [ -z "${id}" ] && continue
   type_count="${TYPE_COUNTS["${type}"]:-0}"
   if [ "${type_count}" -ge 2 ]; then
     continue
   fi
-  printf '%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s\n' \
+  printf '%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s\n' \
     "${score}" "${OUT_SEPARATOR}" "${id}" "${OUT_SEPARATOR}" "${title}" "${OUT_SEPARATOR}" \
     "${path}" "${OUT_SEPARATOR}" "${type}" "${OUT_SEPARATOR}" "${summary}" "${OUT_SEPARATOR}" \
     "${confidence}" "${OUT_SEPARATOR}" "${action}" "${OUT_SEPARATOR}" "${adoption_cost}" "${OUT_SEPARATOR}" \
-    "${source_project}" "${OUT_SEPARATOR}" "${source_artifact}" "${OUT_SEPARATOR}" "${reasons}" >> "${SELECTED_RESULTS}"
+    "${reasons}" >> "${SELECTED_RESULTS}"
   TYPE_COUNTS["${type}"]=$((type_count + 1))
   if [ "$(wc -l < "${SELECTED_RESULTS}")" -ge "${LIMIT}" ]; then
     break
@@ -236,9 +242,7 @@ if [ "${JSON_OUTPUT}" = "true" ]; then
           confidence: .[6],
           action: .[7],
           adoption_cost: .[8],
-          source_project: .[9],
-          source_artifact: .[10],
-          why: (.[11] | if length == 0 then [] else split(" ") end)
+          why: (.[9] | if length == 0 then [] else split(" ") end)
         }
     ]
     | {
@@ -249,7 +253,7 @@ if [ "${JSON_OUTPUT}" = "true" ]; then
   ' < "${SELECTED_RESULTS}"
 else
   echo "Recommendations for: ${PROJECT_REPO_PATH}"
-  while IFS="${OUT_SEPARATOR}" read -r score id title path type summary confidence action adoption_cost source_project source_artifact reasons; do
+  while IFS="${OUT_SEPARATOR}" read -r score id title path type summary confidence action adoption_cost reasons; do
     [ -z "${id}" ] && continue
     echo
     echo "[${score}] ${title} (${id})"
@@ -258,7 +262,6 @@ else
     echo "Action: ${action}"
     echo "Adoption cost: ${adoption_cost}"
     echo "Source: ${path}"
-    [ -n "${source_project}" ] && echo "Promoted from: ${source_project}"
     [ -n "${summary}" ] && echo "Summary: ${summary}"
     [ -n "${reasons}" ] && echo "Why: ${reasons}"
   done < "${SELECTED_RESULTS}"

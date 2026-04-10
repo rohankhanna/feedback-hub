@@ -60,8 +60,6 @@ SELECT
   IFNULL(e.status, ''),
   IFNULL(e.superseded_by, ''),
   IFNULL(e.last_validated_at, ''),
-  IFNULL(e.source_project, ''),
-  IFNULL(e.source_artifact, ''),
   IFNULL((SELECT group_concat(tag, ' ') FROM learning_tags WHERE learning_id = e.id), ''),
   IFNULL((SELECT group_concat(facet_key || ':' || facet_value, ' ') FROM learning_facets WHERE learning_id = e.id), '')
 FROM learning_entities e
@@ -75,8 +73,9 @@ if [ -z "${QUERY_RESULT}" ]; then
   exit 1
 fi
 
-IFS="${DB_SEPARATOR}" read -r id title path type summary status superseded_by last_validated_at source_project source_artifact tags_text facets_text <<< "${QUERY_RESULT}"
+IFS="${DB_SEPARATOR}" read -r id title path type summary status superseded_by last_validated_at tags_text facets_text <<< "${QUERY_RESULT}"
 ABS_PATH="$(feedback_data_root)/${path}"
+BODY_TEXT="$(feedback_artifact_json_body_text "${ABS_PATH}")"
 USAGE_PROJECT_PATH="$(feedback_infer_usage_project_path "$(pwd)" 2>/dev/null || true)"
 if [ -n "${USAGE_PROJECT_PATH}" ]; then
   USAGE_PROJECT_NAME="$(feedback_project_name_from_path "${USAGE_PROJECT_PATH}")"
@@ -90,6 +89,7 @@ fi
 
 if [ "${JSON_OUTPUT}" = "true" ]; then
   jq -n \
+    --slurpfile artifact "${ABS_PATH}" \
     --arg id "${id}" \
     --arg title "${title}" \
     --arg path "${ABS_PATH}" \
@@ -98,11 +98,9 @@ if [ "${JSON_OUTPUT}" = "true" ]; then
     --arg status "${status}" \
     --arg superseded_by "${superseded_by}" \
     --arg last_validated_at "${last_validated_at}" \
-    --arg source_project "${source_project}" \
-    --arg source_artifact "${source_artifact}" \
     --arg tags_text "${tags_text}" \
     --arg facets_text "${facets_text}" \
-    --rawfile body "${ABS_PATH}" \
+    --arg body "${BODY_TEXT}" \
     '{
       id: $id,
       title: $title,
@@ -112,11 +110,10 @@ if [ "${JSON_OUTPUT}" = "true" ]; then
       status: $status,
       superseded_by: $superseded_by,
       last_validated_at: $last_validated_at,
-      source_project: $source_project,
-      source_artifact: $source_artifact,
       tags_text: $tags_text,
       facets_text: $facets_text,
-      body: $body
+      body: $body,
+      artifact: $artifact[0]
     }'
 else
   echo "${title} (${id})"
@@ -125,10 +122,9 @@ else
   echo "Status: ${status}"
   [ -n "${superseded_by}" ] && echo "Superseded by: ${superseded_by}"
   [ -n "${last_validated_at}" ] && echo "Last validated: ${last_validated_at}"
-  [ -n "${source_project}" ] && echo "Promoted from: ${source_project}"
   [ -n "${summary}" ] && echo "Summary: ${summary}"
   [ -n "${tags_text}" ] && echo "Tags: ${tags_text}"
   [ -n "${facets_text}" ] && echo "Facets: ${facets_text}"
   echo
-  cat "${ABS_PATH}"
+  printf '%s\n' "${BODY_TEXT}"
 fi

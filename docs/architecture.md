@@ -1,95 +1,54 @@
 # Architecture
 
-## Overview
-`feedback-hub` separates repo-local project integration from externally stored runtime text artifacts and from rebuildable fast-lookup state.
+## What this does for you
+- Gives each integrated local project a sovereign place to write feedback artifacts.
+- Preserves a local curated learnings layer that can be reused across projects on the same machine.
+- Prevents accidental cross-project overwrite by keeping project writes isolated.
+- Keeps runtime data out of version-controlled repo history.
 
-The architecture has three explicit zones:
-- the project-facing shell used inside integrated repos
-- the externally stored hub-owned canonical text artifacts
-- optional automation plus rebuildable derived state
+## Diagram
+Diagram source:
+- `docs/architecture.diagram.json`
 
-## Public Diagram Status
-The public branch intentionally does not publish a single overview SVG.
+Generated output:
+- `docs/architecture.svg`
 
-Reason:
-- the previous single-view diagram was not coherent enough to carry the public architecture story cleanly
-- this system is easier to explain through multiple focused views than through one overloaded summary diagram
+Refresh it with:
 
-Current public rule:
-- this document is the narrative architecture source of truth
-- the diagram set complements this document with three generated focused views
-- the public verifier checks that those generated views are current
+```bash
+./scripts/render_architecture.sh --write
+```
 
-Published public views:
-1. `docs/diagrams/repo-local-integration.svg`
-2. `docs/diagrams/canonical-artifacts-and-promotion-flow.svg`
-3. `docs/diagrams/automation-and-rebuildable-state.svg`
+Verify it is current with:
 
-## Zones
+```bash
+./scripts/render_architecture.sh --check
+```
 
-### 1. Project-Facing Shell
-Each integrated project gets repo-local entrypoints:
-- `feedback/` as the project-owned raw write surface
-- `learnings/` as the shared read-only memory surface
-- the `feedback` CLI for integration and capture
-- the `learnings` CLI for indexing, search, recommendation, and recorded adoption outcomes
+![feedback-hub architecture](architecture.svg)
 
-This shell is where normal project work happens. It should feel local to the project repo even though the shared memory is hub-managed.
-
-### 2. Hub-Owned Canonical Text Artifacts
-The hub owns two canonical text layers:
-- project feedback
-- curated learnings
-
-Those text layers are canonical runtime data, not committed repo content. The public repo ships the tool shell and docs; the live text corpus lives under the configured data root.
-
-Project feedback is the raw ingestion surface for:
-- lessons
-- decisions
-- incidents
-- incoming guidance
-- outgoing guidance
-
-Curated learnings hold reusable cross-project material promoted from that raw surface.
-
-The key boundary is:
-- projects write only project feedback
-- projects do not write curated learnings directly
-- promotion review is the only path from raw project feedback into curated learnings
-
-### 3. Automation And Rebuildable Derived State
-Automation is optional. A scheduler and user-configured backend adapter may review changed feedback batches and emit promotion decisions.
-
-Lookup performance uses rebuildable derived state:
-- SQLite index
-- profiles
-- usage logs
-- recommendation inputs
-
-This state exists to make the text corpus usable quickly. It is not the source of truth.
-
-## Public Diagram Set
-The public diagram set is intentionally split into focused views rather than one flattened overview.
-
-Published views:
-1. repo-local integration view
-2. canonical artifact and promotion-flow view
-3. automation and rebuildable-state view
-
-## Design Rules
-- keep canonical knowledge as text artifacts
-- keep derived state rebuildable
-- keep project writes isolated from shared curated memory
-- require explicit promotion for cross-project learnings
-- keep backend integrations replaceable
-- keep optional automation separate from the base shell so manual local use still works
-
-## Integration Model
-Project integration gives a repo:
-- a local feedback path
-- a local learnings path
-- command surfaces for capture, indexing, search, and recommendation
-
-The public shell documents this generically and does not assume any private workstation layout.
-
-In a local checkout, those feedback/learnings/projects/state paths may be exposed as convenience symlinks, but they are local operator surfaces rather than tracked source content.
+## Implementation details
+- Version-controlled content stays in the repo checkout:
+  - scripts
+  - docs
+  - config examples
+  - architecture sources and generated diagrams
+- Runtime data lives under the resolved feedback-hub data root. The exact location depends on local configuration and environment.
+- The runtime data root contains:
+  - per-project feedback as the ingestion layer for sovereign project artifacts
+  - curated local learnings as the reusable shared memory layer
+  - `.state/` as rebuildable indexes, logs, and usage state
+- The target structured local artifact contract is documented in `docs/feedback-artifacts.md`.
+- Some local setups may expose convenience links into that runtime data root, but those are local-only operator surfaces and are not part of the committed source tree.
+- In source repositories outside `feedback-hub`, local integration paths created by this tool should stay out of that repo's version control.
+- Promotion path:
+  1. Project writes artifact to `projects/<project>/feedback/...`.
+  2. Manager reviews and approves.
+  3. Manager promotes with `scripts/promote_feedback.sh` into one of:
+     - `learnings/patterns`
+     - `learnings/templates`
+     - `learnings/agents`
+     - `learnings/anti-patterns`
+- Permission model:
+  - `scripts/lock_learnings.sh` enforces read-only learnings by default.
+  - `scripts/unlock_learnings.sh` temporarily allows manager writes.

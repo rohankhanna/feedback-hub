@@ -255,6 +255,35 @@ feedback_learnings_entity_id_from_relpath() {
   printf 'learning_%s\n' "$(feedback_slugify "${rel_path//\//-}")"
 }
 
+feedback_artifact_json_string() {
+  local file_path="$1"
+  local jq_expr="$2"
+
+  jq -r "${jq_expr} // \"\"" "${file_path}" 2>/dev/null || printf '\n'
+}
+
+feedback_artifact_json_body_text() {
+  local file_path="$1"
+
+  jq -r '
+    [
+      (.artifact.title // empty),
+      (.content.summary // empty),
+      (.content.context // empty),
+      (.content.action_taken // empty),
+      (.content.result // empty),
+      (.content.reuse_guidance // empty),
+      (.content.body_markdown // empty),
+      (.content.sections[]?.heading // empty),
+      (.content.sections[]?.body_markdown // empty),
+      (.subject.topic // empty),
+      (.subject.generic_exemplars[]? // empty)
+    ]
+    | map(select(length > 0))
+    | join("\n\n")
+  ' "${file_path}" 2>/dev/null || printf '\n'
+}
+
 feedback_extract_frontmatter_value() {
   local file_path="$1"
   local key="$2"
@@ -349,10 +378,19 @@ feedback_markdown_summary() {
 
 feedback_learnings_text_blob() {
   local file_path="$1"
-  (
+
+  if [ "${file_path##*.}" = "json" ]; then
+    {
+      printf '%s\n' "$(basename "${file_path}")"
+      feedback_artifact_json_body_text "${file_path}"
+    } | tr '[:upper:]' '[:lower:]'
+    return 0
+  fi
+
+  {
     printf '%s\n' "$(basename "${file_path}")"
     cat "${file_path}"
-  ) | tr '[:upper:]' '[:lower:]'
+  } | tr '[:upper:]' '[:lower:]'
 }
 
 feedback_learnings_detect_facets() {
@@ -421,7 +459,7 @@ feedback_learnings_detect_tags() {
 
   {
     printf '%s\n' "${learning_type}"
-    printf '%s\n' "$(basename "${rel_path}" .md | tr '-' '\n')"
+    printf '%s\n' "$(basename "${rel_path%.*}" | tr '-' '\n')"
     printf '%s\n' "${facets_tsv}" | awk -F '\t' '{ print $2 }'
     printf '%s\n' "${blob}" | grep -Eq '\bbest practice\b|pattern\b' && printf 'pattern\n'
     printf '%s\n' "${blob}" | grep -Eq '\banti-pattern\b|avoid\b' && printf 'anti-pattern\n'

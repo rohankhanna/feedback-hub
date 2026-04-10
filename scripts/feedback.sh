@@ -16,23 +16,24 @@ Usage:
   feedback <command> [args]
 
 Commands:
-  apply [project_repo_path]   Apply feedback-hub integration to a project repo
-  apply-all [desktop_root]    Apply integration across repos under a root
-  status [project_repo_path]  Show integration status for a project
-  capture --kind ...          Capture a feedback artifact into project feedback
-  lesson <title> [path]       Capture a lesson into feedback/lessons
-  decision <title> [path]     Capture a decision into feedback/decisions
-  incident <title> [path]     Capture an incident into feedback/incidents
-  incoming <title> [path]     Capture adopted external guidance into feedback/incoming
-  outgoing <title> [path]     Capture cross-project guidance into feedback/outgoing
-  learn <title> [path]        Deprecated alias for `feedback lesson`
+  apply [project_repo_path]  Apply feedback-hub integration to a project
+  apply-all [desktop_root]   Apply integration across known local repos
+  status [project_repo_path] Show integration status for a project
+  capture --kind ...         Capture a feedback artifact into sovereign project feedback
+  lesson <title> [path]      Capture a lesson into project feedback/lessons
+  decision <title> [path]    Capture a decision into project feedback/decisions
+  incident <title> [path]    Capture an incident into project feedback/incidents
+  incoming <title> [path]    Capture adopted external guidance into feedback/incoming
+  outgoing <title> [path]    Capture cross-project guidance into feedback/outgoing
+  learn <title> [path]       Deprecated alias for `feedback lesson`
   delete [path] [--purge --yes]
-                              Remove local links; optionally purge hub project feedback
-  register <project_name>     Create hub feedback folders only
-  lock                        Deprecated alias for `learnings lock`
-  unlock                      Deprecated alias for `learnings unlock`
-  promote <args...>           Deprecated alias for `learnings promote`
-  help                        Show this help
+                              Remove links; optionally purge hub project feedback
+  sync [subcommand]          Deprecated alias for `learnings sync`
+  register <project_name>    Create hub feedback folders only
+  lock                       Deprecated alias for `learnings lock`
+  unlock                     Deprecated alias for `learnings unlock`
+  promote <args...>          Deprecated alias for `learnings promote`
+  help                       Show this help
 USAGE
 }
 
@@ -102,6 +103,10 @@ case "${COMMAND}" in
     ;;
   delete)
     exec "${SCRIPT_DIR}/feedback_delete.sh" "$@"
+    ;;
+  sync)
+    echo "Notice: feedback sync is deprecated. Use 'learnings sync'." >&2
+    exec "${SCRIPT_DIR}/feedback_sync.sh" "$@"
     ;;
   register)
     exec "${SCRIPT_DIR}/register_project.sh" "$@"

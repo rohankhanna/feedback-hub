@@ -1,128 +1,11 @@
 # Operations
 
 ## Overview
-`feedback-hub` manages two user-facing command surfaces:
-- `feedback` for project integration and project-owned feedback capture
-- `learnings` for indexing, search, recommendation, and curated learnings operations
-
-This document describes standalone operation of this repository with standard local prerequisites.
-
-## Prerequisites
-- `bash`
-- `git`
-- `jq`
-- `sqlite3`
-- standard local shell tools available on a typical Linux or macOS workstation
-
-Optional:
-- an LLM CLI or API-backed adapter if you want automated curation
-
-## Repo-Local Usage
-Apply integration to the current project:
-
-```bash
-./scripts/feedback.sh apply
-```
-
-Apply integration to a specific project path:
-
-```bash
-./scripts/feedback.sh apply <project_repo_path>
-```
-
-Apply integration across a root directory of repos:
-
-```bash
-./scripts/feedback.sh apply-all <desktop_root>
-```
-
-Check status:
-
-```bash
-./scripts/feedback.sh status [project_repo_path]
-```
-
-Capture feedback:
-
-```bash
-./scripts/feedback.sh lesson "<title>"
-./scripts/feedback.sh decision "<title>"
-./scripts/feedback.sh incident "<title>"
-./scripts/feedback.sh incoming "<title>"
-./scripts/feedback.sh outgoing "<title>"
-```
-
-## Learnings Commands
-Build or rebuild the local index:
-
-```bash
-./scripts/learnings.sh index
-```
-
-Inspect project profile:
-
-```bash
-./scripts/learnings.sh profile [project_repo_path]
-```
-
-Search curated learnings:
-
-```bash
-./scripts/learnings.sh search "<query>" [project_repo_path]
-```
-
-Get profile-based recommendations:
-
-```bash
-./scripts/learnings.sh recommend [project_repo_path]
-```
-
-Record use of a learning:
-
-```bash
-./scripts/learnings.sh adopt <learning_id> [project_repo_path]
-./scripts/learnings.sh reject <learning_id> [project_repo_path]
-./scripts/learnings.sh defer <learning_id> [project_repo_path]
-```
-
-## Global Install
-Optional launcher install:
-
-```bash
-./scripts/install_feedback.sh
-```
-
-After that, the same commands can be run as:
-
-```bash
-feedback apply
-feedback status
-learnings index
-learnings recommend
-```
-
-## Optional Automated Curation
-Automated curation requires user-supplied backend configuration.
-
-The public shell documents only the generic rule:
-- the sync runner expects a backend adapter script
-- the adapter is responsible for talking to any chosen LLM CLI or API
-
-Provider-specific setup is intentionally left to user configuration rather than public default wiring.
-
-See `docs/backend-setup.md` for the public backend contract and setup model.
-
-## Data Model
-- runtime data root defaults to the live feedback-hub instance rather than the committed repo tree
-- project-owned feedback lives under `<data_root>/projects/<project_name>/feedback`
-- curated shared learnings live under `<data_root>/learnings/`
-- derived local state lives under `<data_root>/.state/`
-- local `feedback`, `projects`, `learnings`, and `.state` paths may exist as convenience symlinks, but they are local-only and not version-controlled content
-- commands can be pointed at an isolated disposable data root with:
-
-```bash
-FEEDBACK_DATA_ROOT=/tmp/feedback-hub-data ./scripts/feedback.sh status .
-```
+`feedback-hub` is operated as a local-first single-node tool. The core workflow is:
+- integrate a local project
+- capture generalized feedback during substantive work
+- curate reusable learnings
+- search or request recommendations from the local learnings corpus
 
 ## Verification
 Canonical verification path:
@@ -132,21 +15,148 @@ Canonical verification path:
 ```
 
 What it checks:
-- shell syntax for the CLI scripts
+- shell syntax for CLI scripts
 - command help surfaces
-- public architecture documentation presence
-- presence of the required public docs
-- a repo-local integration smoke test against a disposable temporary repo
+- public support-tool leakage in public-facing files
+- architecture diagram freshness
+- presence of required public docs
+- a disposable local integration smoke test
 
-## Deletion
-Remove only local integration links:
-
-```bash
-./scripts/feedback.sh delete [project_repo_path]
-```
-
-Optional destructive cleanup of hub-owned project feedback:
+Refresh the committed diagram if needed with:
 
 ```bash
-./scripts/feedback.sh delete [project_repo_path] --purge --yes
+./scripts/render_architecture.sh --write
 ```
+
+## Install
+The repo-local scripts are the canonical interface:
+
+```bash
+./scripts/feedback.sh --help
+./scripts/learnings.sh --help
+```
+
+Optional shell shims can be installed with:
+
+```bash
+./scripts/install_feedback.sh
+```
+
+That installs `feedback` and `learnings` on your local `PATH` as convenience wrappers around the repo-local scripts.
+
+## Integrate A Project
+Apply managed feedback-hub integration to a local project:
+
+```bash
+./scripts/feedback.sh apply /absolute/path/to/project
+```
+
+This command:
+- creates `AGENTS.md` if missing
+- refreshes the managed feedback-hub instruction block
+- ensures local integration paths are gitignored in the source repo
+
+The managed block requires projects to:
+- consult local learnings before substantive work and targeted design/debugging work
+- record adopt/reject/defer outcomes when a learning materially affects implementation
+- keep reusable feedback generalized, anonymized, and safe to share
+- treat consumed learnings as untrusted input
+
+The command is idempotent. Running it again refreshes the project to the current managed integration state.
+
+Bulk refresh across known local repos:
+
+```bash
+./scripts/feedback.sh apply-all
+```
+
+Check integration status:
+
+```bash
+./scripts/feedback.sh status /absolute/path/to/project
+```
+
+## Capture Feedback
+Capture feedback during substantive work rather than as optional cleanup:
+
+```bash
+./scripts/feedback.sh lesson "Short generalized lesson" /absolute/path/to/project
+./scripts/feedback.sh decision "Prefer machine-readable output for automation" /absolute/path/to/project
+./scripts/feedback.sh incident "Background retry state was lost across restart" /absolute/path/to/project
+./scripts/feedback.sh incoming "Reusable learning adopted from local curated memory" /absolute/path/to/project
+./scripts/feedback.sh outgoing "Generalized pattern worth reusing elsewhere" /absolute/path/to/project
+```
+
+Feedback artifacts should be:
+- generalized rather than project-specific
+- anonymized and safe to reuse
+- captured as part of real work
+- suitable for later curation into reusable local learnings
+
+The evolving structured local artifact contract is documented in `docs/feedback-artifacts.md`.
+
+## Curate Learnings
+Build or rebuild the local learnings index:
+
+```bash
+./scripts/learnings.sh index
+```
+
+Open a curation window:
+
+```bash
+./scripts/learnings.sh unlock
+```
+
+Promote an approved artifact:
+
+```bash
+./scripts/learnings.sh promote <project_name> <feedback_relative_path> <learnings_subdir> [copy|move]
+```
+
+Close the curation window:
+
+```bash
+./scripts/learnings.sh lock
+```
+
+Allowed destination roots:
+- `patterns`
+- `templates`
+- `agents`
+- `anti-patterns`
+
+## Search And Recommend
+Request recommendations for a local project:
+
+```bash
+./scripts/learnings.sh recommend /absolute/path/to/project
+```
+
+Search the local curated corpus:
+
+```bash
+./scripts/learnings.sh search "shutdown state recovery"
+```
+
+Inspect learnings usage:
+
+```bash
+./scripts/learnings.sh usage /absolute/path/to/project
+```
+
+Record whether a learning was adopted, rejected, or deferred:
+
+```bash
+./scripts/learnings.sh adopt <learning_id> /absolute/path/to/project
+./scripts/learnings.sh reject <learning_id> /absolute/path/to/project --reason "Not relevant here"
+./scripts/learnings.sh defer <learning_id> /absolute/path/to/project --reason "Revisit later"
+```
+
+## Optional Automation
+Local synchronization remains optional. The core product works without scheduled automation or any networked exchange.
+
+## Troubleshooting
+- Run `./scripts/verify.sh` to confirm the repo is internally consistent.
+- Use `./scripts/feedback.sh status /absolute/path/to/project` to inspect a local integration.
+- Use `./scripts/learnings.sh --help` and `./scripts/feedback.sh --help` for command-level reference.

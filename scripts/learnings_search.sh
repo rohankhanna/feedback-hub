@@ -154,10 +154,10 @@ run_fts_query() {
   sqlite3 -separator "${DB_SEPARATOR}" "${DB_PATH:-$(feedback_learnings_db_path)}" <<SQL > "${out_file}"
 SELECT
   e.id,
-  e.title,
+  REPLACE(REPLACE(e.title, char(10), ' '), char(13), ' '),
   e.path,
   e.type,
-  IFNULL(e.summary, ''),
+  REPLACE(REPLACE(IFNULL(e.summary, ''), char(10), ' '), char(13), ' '),
   bm25(learning_fts, 10.0, 5.0, 1.0, 2.0, 1.0),
   IFNULL((SELECT group_concat(tag, ' ') FROM learning_tags WHERE learning_id = e.id), ''),
   IFNULL((SELECT group_concat(facet_key || ':' || facet_value, ' ') FROM learning_facets WHERE learning_id = e.id), '')
@@ -178,6 +178,13 @@ score_results_file() {
   : > "${output_file}"
   while IFS="${DB_SEPARATOR}" read -r id title path type summary rank tags_text facets_text; do
     [ -z "${id}" ] && continue
+    id="$(feedback_single_line "${id}")"
+    title="$(feedback_single_line "${title}")"
+    path="$(feedback_single_line "${path}")"
+    type="$(feedback_single_line "${type}")"
+    summary="$(feedback_single_line "${summary}")"
+    tags_text="$(feedback_single_line "${tags_text}")"
+    facets_text="$(feedback_single_line "${facets_text}")"
     profile_boost="0"
     reasons=()
 
@@ -200,7 +207,7 @@ score_results_file() {
     printf '%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s\n' \
       "${final_score}" "${OUT_SEPARATOR}" "${id}" "${OUT_SEPARATOR}" "${title}" "${OUT_SEPARATOR}" \
       "${path}" "${OUT_SEPARATOR}" "${type}" "${OUT_SEPARATOR}" "${summary}" "${OUT_SEPARATOR}" \
-      "${tags_text}" "${OUT_SEPARATOR}" "${facets_text}" "${OUT_SEPARATOR}" "${reasons[*]:-}" >> "${output_file}"
+      "${tags_text}" "${OUT_SEPARATOR}" "${facets_text}" "${OUT_SEPARATOR}" "$(feedback_single_line "${reasons[*]:-}")" >> "${output_file}"
   done < "${input_file}"
 }
 

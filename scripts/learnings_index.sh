@@ -118,23 +118,23 @@ while IFS= read -r file_path; do
 
   rel_path="${file_path#$(feedback_data_root)/}"
   learning_type="$(printf '%s' "${rel_path}" | cut -d'/' -f2)"
-  IFS=$'\t' read -r learning_id summary evidence_strength adoption_cost <<< "$(feedback_extract_frontmatter_fields_tsv "${file_path}" id summary evidence_strength adoption_cost)"
-  learning_id="$(feedback_trim "${learning_id}")"
+  learning_id="$(feedback_trim "$(feedback_artifact_json_string "${file_path}" '.artifact.id')")"
   [ -z "${learning_id}" ] && learning_id="$(feedback_learnings_entity_id_from_relpath "${rel_path}")"
-  title="$(feedback_markdown_title "${file_path}")"
-  summary="$(feedback_trim "${summary}")"
-  [ -z "${summary}" ] && summary="$(feedback_markdown_summary "${file_path}")"
-  body="$(cat "${file_path}")"
+  title="$(feedback_trim "$(feedback_artifact_json_string "${file_path}" '.artifact.title')")"
+  [ -z "${title}" ] && title="$(basename "${file_path}" .json)"
+  summary="$(feedback_trim "$(feedback_artifact_json_string "${file_path}" '.content.summary')")"
+  body="$(feedback_artifact_json_body_text "${file_path}")"
   file_hash="$(feedback_sha256_file "${file_path}")"
   updated_at="$(feedback_file_mtime_utc "${file_path}")"
-  created_at="${updated_at}"
-  evidence_strength="$(feedback_trim "${evidence_strength}")"
+  created_at="$(feedback_trim "$(feedback_artifact_json_string "${file_path}" '.artifact.captured_at')")"
+  [ -z "${created_at}" ] && created_at="${updated_at}"
+  evidence_strength=""
   [ -z "${evidence_strength}" ] && evidence_strength="$(feedback_learnings_default_evidence_strength "${learning_type}")"
   evidence_strength="$(feedback_sql_real_or_default "${evidence_strength}" "$(feedback_learnings_default_evidence_strength "${learning_type}")")"
-  adoption_cost="$(feedback_trim "${adoption_cost}")"
+  adoption_cost=""
   [ -z "${adoption_cost}" ] && adoption_cost="$(feedback_learnings_default_adoption_cost "${learning_type}")"
-  source_project="${PROMO_SOURCE_PROJECT["${rel_path}"]:-}"
-  source_artifact="${PROMO_SOURCE_ARTIFACT["${rel_path}"]:-}"
+  source_project=""
+  source_artifact=""
   superseded_by="${SUPERSEDED_BY["${learning_id}"]:-}"
   last_validated_at="${LAST_VALIDATED_AT["${learning_id}"]:-}"
   status="active"
@@ -216,11 +216,18 @@ SQL
   fi
 
   INDEXED_COUNT=$((INDEXED_COUNT + 1))
-done < <(find "$(feedback_learnings_dir)" -mindepth 2 -maxdepth 3 -type f -name '*.md' | sort)
+done < <(find "$(feedback_learnings_dir)" -mindepth 2 -maxdepth 3 -type f -name '*.json' | sort)
 
 while IFS= read -r interaction_file; do
   [ -z "${interaction_file}" ] && continue
-  IFS=$'\t' read -r interaction_kind learning_id project_name recorded_at note interaction_id <<< "$(feedback_extract_frontmatter_fields_tsv "${interaction_file}" interaction_action learning_id project recorded_at note interaction_id)"
+  artifact_class="$(feedback_trim "$(feedback_artifact_json_string "${interaction_file}" '.schema.artifact_class')")"
+  [ "${artifact_class}" = "learning_interaction" ] || continue
+  interaction_kind="$(feedback_trim "$(feedback_artifact_json_string "${interaction_file}" '.extensions.interaction.action')")"
+  learning_id="$(feedback_trim "$(feedback_artifact_json_string "${interaction_file}" '.links.related_artifacts[0]')")"
+  project_name="$(printf '%s' "${interaction_file}" | sed -E 's#^.*/projects/([^/]+)/feedback/.*$#\1#')"
+  recorded_at="$(feedback_trim "$(feedback_artifact_json_string "${interaction_file}" '.artifact.captured_at')")"
+  note="$(feedback_trim "$(feedback_artifact_json_string "${interaction_file}" '.extensions.interaction.note')")"
+  interaction_id="$(feedback_trim "$(feedback_artifact_json_string "${interaction_file}" '.artifact.id')")"
   interaction_kind="$(feedback_trim "${interaction_kind}")"
   learning_id="$(feedback_trim "${learning_id}")"
   project_name="$(feedback_trim "${project_name}")"
@@ -245,7 +252,7 @@ VALUES (
   '$(feedback_escape_sql "${recorded_at}")'
 );
 SQL
-done < <(find "$(feedback_projects_dir)" -type f -path '*/feedback/incoming/*.md' | sort)
+done < <(find "$(feedback_projects_dir)" -type f -path '*/feedback/incoming/*.json' | sort)
 
 while IFS= read -r usage_file; do
   [ -z "${usage_file}" ] && continue

@@ -21,20 +21,6 @@ chmod +x "${FEEDBACK_SOURCE_SCRIPT}" "${LEARNINGS_SOURCE_SCRIPT}" "${FEEDBACK_BI
 echo "Installed command: ${FEEDBACK_BIN_PATH} -> ${FEEDBACK_SOURCE_SCRIPT}"
 echo "Installed command: ${LEARNINGS_BIN_PATH} -> ${LEARNINGS_SOURCE_SCRIPT}"
 
-echo
-echo "Use it from this repo:"
-echo "  ./scripts/feedback.sh apply"
-echo "  ./scripts/feedback.sh status"
-echo "  ./scripts/learnings.sh recommend"
-echo
-echo "Or, after installation, from any project directory:"
-echo "  feedback apply"
-echo "  feedback status"
-echo "  feedback lesson \"<lesson title>\""
-echo "  learnings profile"
-echo "  learnings recommend"
-echo "  learnings search \"<query>\""
-echo
 case ":${PATH}:" in
   *":${BIN_DIR}:"*)
     echo "PATH check: ${BIN_DIR} is already on PATH."
@@ -45,3 +31,17 @@ case ":${PATH}:" in
     echo "export PATH=\"${HOME}/.local/bin:\$PATH\""
     ;;
 esac
+
+echo "Use it from any project directory:"
+echo "feedback apply"
+echo "feedback apply-all"
+echo "feedback status"
+echo "feedback lesson \"<lesson title>\""
+echo "learnings profile"
+echo "learnings recommend"
+echo "learnings search \"<query>\""
+echo "Or from anywhere:"
+echo "feedback apply /absolute/path/to/project"
+echo "feedback apply-all /absolute/path/to/desktop"
+echo "feedback lesson \"<lesson title>\" /absolute/path/to/project"
+echo "learnings recommend /absolute/path/to/project"

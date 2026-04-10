@@ -238,6 +238,13 @@ feedback_trim() {
   printf '%s\n' "${value}"
 }
 
+feedback_single_line() {
+  printf '%s' "${1:-}" \
+    | tr '\r\n\036\037' '    ' \
+    | sed 's/[[:space:]]\+/ /g; s/^ //; s/ $//'
+  printf '\n'
+}
+
 feedback_is_positive_integer() {
   local value="${1:-}"
 

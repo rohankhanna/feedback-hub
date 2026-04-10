@@ -1,0 +1,322 @@
+{
+  "title": "feedback-hub architecture",
+  "description": "feedback-hub architecture showing repo-local integration, hub-owned canonical text artifacts, optional automation, and rebuildable derived state.",
+  "width": 1360,
+  "height": 920,
+  "groups": [
+    {
+      "x": 24,
+      "y": 86,
+      "w": 400,
+      "h": 540,
+      "label": "Project-facing shell",
+      "subtitle": "repo-local integration, capture, and consultation"
+    },
+    {
+      "x": 452,
+      "y": 86,
+      "w": 430,
+      "h": 540,
+      "label": "Hub-owned canonical text artifacts",
+      "subtitle": "the source of truth lives in text, not in caches"
+    },
+    {
+      "x": 910,
+      "y": 86,
+      "w": 426,
+      "h": 540,
+      "label": "Automation and rebuildable state",
+      "subtitle": "optional curation plus fast lookup surfaces"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "repos",
+      "x": 56,
+      "y": 140,
+      "w": 336,
+      "h": 110,
+      "fill": "#EAF4EC",
+      "stroke": "#3B7A57",
+      "lines": [
+        "Integrated project repos",
+        "the developer works in a normal project repo",
+        "feedback-hub integrates repo-local entrypoints"
+      ]
+    },
+    {
+      "id": "feedback_path",
+      "x": 56,
+      "y": 310,
+      "w": 156,
+      "h": 110,
+      "fill": "#F5F4E8",
+      "stroke": "#7B7347",
+      "lines": [
+        "repo-local",
+        "feedback/",
+        "project-owned raw write surface"
+      ]
+    },
+    {
+      "id": "learnings_path",
+      "x": 236,
+      "y": 310,
+      "w": 156,
+      "h": 110,
+      "fill": "#EDF4FB",
+      "stroke": "#496D8C",
+      "lines": [
+        "repo-local",
+        "learnings/",
+        "shared read-only memory"
+      ]
+    },
+    {
+      "id": "feedback_cli",
+      "x": 56,
+      "y": 470,
+      "w": 156,
+      "h": 116,
+      "fill": "#F8E6EF",
+      "stroke": "#8E3B6F",
+      "lines": [
+        "feedback CLI",
+        "apply integration",
+        "capture lessons",
+        "decisions and incidents"
+      ]
+    },
+    {
+      "id": "learnings_cli",
+      "x": 236,
+      "y": 470,
+      "w": 156,
+      "h": 116,
+      "fill": "#E7F2F8",
+      "stroke": "#2F6F91",
+      "lines": [
+        "learnings CLI",
+        "index, search, recommend",
+        "show, related, adopt"
+      ]
+    },
+    {
+      "id": "feedback",
+      "x": 500,
+      "y": 140,
+      "w": 332,
+      "h": 126,
+      "fill": "#FFF2D9",
+      "stroke": "#9D6C00",
+      "lines": [
+        "Project feedback",
+        "project-owned raw lessons, decisions, incidents,",
+        "incoming guidance, and outgoing guidance",
+        "canonical write surface for new information"
+      ]
+    },
+    {
+      "id": "promotion",
+      "x": 500,
+      "y": 328,
+      "w": 332,
+      "h": 126,
+      "fill": "#F7EEE4",
+      "stroke": "#8B6338",
+      "lines": [
+        "Promotion review",
+        "select reusable cross-project material",
+        "approve only curated, generalized outputs"
+      ]
+    },
+    {
+      "id": "learnings",
+      "x": 500,
+      "y": 516,
+      "w": 332,
+      "h": 126,
+      "fill": "#E4F0FA",
+      "stroke": "#2E6DA4",
+      "lines": [
+        "Curated learnings",
+        "patterns, templates, and guidance",
+        "shared read-only memory for projects",
+        "promoted from approved project feedback"
+      ]
+    },
+    {
+      "id": "derived",
+      "x": 958,
+      "y": 328,
+      "w": 330,
+      "h": 126,
+      "fill": "#EDEDED",
+      "stroke": "#5E5E5E",
+      "lines": [
+        "Derived state",
+        "SQLite index, profiles, usage, and logs",
+        "rebuildable from text artifacts",
+        "not the source of truth"
+      ]
+    },
+    {
+      "id": "scheduler",
+      "x": 958,
+      "y": 140,
+      "w": 152,
+      "h": 118,
+      "fill": "#F5F0E6",
+      "stroke": "#7E6A3D",
+      "lines": [
+        "Scheduler",
+        "optional sync cadence",
+        "separate from manual use"
+      ]
+    },
+    {
+      "id": "backend",
+      "x": 1136,
+      "y": 140,
+      "w": 152,
+      "h": 118,
+      "fill": "#F5F0E6",
+      "stroke": "#7E6A3D",
+      "lines": [
+        "Backend adapter",
+        "user-configured model or API",
+        "replaceable by contract"
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "x1": 224,
+      "y1": 250,
+      "x2": 136,
+      "y2": 310,
+      "label": "local feedback surface",
+      "label_dx": -12
+    },
+    {
+      "x1": 224,
+      "y1": 250,
+      "x2": 314,
+      "y2": 310,
+      "label": "local learnings surface",
+      "label_dx": 12
+    },
+    {
+      "x1": 136,
+      "y1": 420,
+      "x2": 136,
+      "y2": 470,
+      "label": "apply, capture",
+      "label_dx": -44
+    },
+    {
+      "x1": 314,
+      "y1": 420,
+      "x2": 314,
+      "y2": 470,
+      "label": "search, recommend",
+      "label_dx": 58
+    },
+    {
+      "x1": 212,
+      "y1": 528,
+      "x2": 500,
+      "y2": 202,
+      "label": "write raw artifacts",
+      "label_dx": -20,
+      "label_dy": -10
+    },
+    {
+      "x1": 500,
+      "y1": 392,
+      "x2": 832,
+      "y2": 202,
+      "label": "review promotion candidates",
+      "label_dx": -20,
+      "label_dy": -12
+    },
+    {
+      "x1": 1034,
+      "y1": 258,
+      "x2": 666,
+      "y2": 328,
+      "label": "schedule review batches",
+      "label_dx": -12,
+      "label_dy": -10
+    },
+    {
+      "x1": 1136,
+      "y1": 199,
+      "x2": 832,
+      "y2": 391,
+      "label": "user-configured review backend",
+      "label_dx": 18,
+      "label_dy": -4
+    },
+    {
+      "x1": 666,
+      "y1": 454,
+      "x2": 666,
+      "y2": 516,
+      "label": "approve and promote"
+    },
+    {
+      "x1": 832,
+      "y1": 579,
+      "x2": 958,
+      "y2": 391,
+      "label": "index, profile, log",
+      "label_dx": 10,
+      "label_dy": -8
+    },
+    {
+      "x1": 500,
+      "y1": 579,
+      "x2": 392,
+      "y2": 365,
+      "label": "shared read-only memory",
+      "label_dx": -8,
+      "label_dy": -16
+    },
+    {
+      "x1": 958,
+      "y1": 391,
+      "x2": 392,
+      "y2": 528,
+      "label": "serve fast local lookup",
+      "label_dx": 40,
+      "label_dy": 10
+    },
+    {
+      "x1": 392,
+      "y1": 528,
+      "x2": 224,
+      "y2": 250,
+      "label": "recommend, adopt, defer",
+      "label_dx": -12,
+      "label_dy": 18
+    }
+  ],
+  "notes": [
+    {
+      "x": 110,
+      "y": 700,
+      "w": 1140,
+      "h": 132,
+      "fill": "#FFFDF7",
+      "stroke": "#AA9A6A",
+      "dasharray": "8 6",
+      "lines": [
+        "Boundary rules captured by the architecture",
+        "Projects write only to project feedback. Projects never write curated learnings directly.",
+        "Curated learnings and project feedback are canonical text artifacts.",
+        "The index, usage logs, and profiles are rebuildable optimizations rather than the source of truth."
+      ]
+    }
+  ]
+}

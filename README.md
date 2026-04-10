@@ -1,62 +1,34 @@
 # feedback-hub
 
-## Purpose
-`feedback-hub` is a local cross-project learning memory for software projects. Each project keeps its own raw feedback in a project-owned area. Reusable lessons, decisions, and patterns can be curated into a shared learnings corpus.
+## Project Intent
+`feedback-hub` is a local-first feedback and learning system for software projects. It helps a developer or agent capture generalized project feedback, curate reusable learnings, and retrieve relevant guidance during future work, all from one local machine.
 
-## Status
-`feedback-hub` is a standalone, local-first CLI for feedback capture, curated learnings lookup, and optional automated curation.
-
-## What It Provides
-- repo-local project integration through `feedback`
-- structured feedback capture for lessons, decisions, incidents, and cross-project guidance
-- shared learnings lookup through `learnings`
-- local indexing, search, and recommendation over curated learnings
-- optional automated curation through a configurable backend adapter
+## What It Does
+- Integrates local projects with managed feedback instructions.
+- Captures generalized lessons, decisions, incidents, and adopted guidance during substantive work.
+- Curates reusable learnings into a local shared memory.
+- Recommends and searches relevant learnings during future work.
 
 ## Quickstart
-
-### Run directly from this repo
 ```bash
-# integrate the current project repo
-./scripts/feedback.sh apply
-
-# check integration status
-./scripts/feedback.sh status
-
-# capture a lesson
-./scripts/feedback.sh lesson "Keep decision records short and concrete"
-
-# build the learnings index
-./scripts/learnings.sh index
-
-# inspect relevant learnings
-./scripts/learnings.sh recommend
-./scripts/learnings.sh search "architecture state recovery"
-```
-
-### Optional global install
-```bash
+# 1) Optional: install shell shims
 ./scripts/install_feedback.sh
 
-feedback apply
-feedback status
-feedback lesson "Keep decision records short and concrete"
-learnings index
-learnings recommend
+# 2) Integrate a local project
+./scripts/feedback.sh apply /absolute/path/to/project
+
+# 3) Capture generalized feedback
+./scripts/feedback.sh lesson "Short generalized lesson" /absolute/path/to/project
+
+# 4) Build the local learnings index
+./scripts/learnings.sh index
+
+# 5) Search or request recommendations
+./scripts/learnings.sh recommend /absolute/path/to/project
+./scripts/learnings.sh search "shutdown state recovery"
 ```
 
-## Core Model
-- each project writes only to its own feedback area
-- curated learnings are shared read-only memory for projects
-- projects do not write directly to the curated learnings corpus
-- the feedback repository owns curation and promotion into shared learnings
-
-## Typical Workflow
-1. Apply integration to a project repo.
-2. Capture lessons, decisions, and incidents during real work.
-3. Rebuild the local learnings index.
-4. Search or recommend learnings before substantive work.
-5. Optionally curate reusable project feedback into shared learnings.
+The repo-local scripts are the canonical public interface. The installed `feedback` and `learnings` shims are optional convenience wrappers.
 
 ## Verification
 Canonical verification path:
@@ -65,37 +37,31 @@ Canonical verification path:
 ./scripts/verify.sh
 ```
 
-If you install the global launchers, verify them too:
+If the generated architecture diagram drifts, refresh it with:
 
 ```bash
-feedback --help
-learnings --help
+./scripts/render_architecture.sh --write
 ```
 
-## Documentation
-- operations: `docs/operations.md`
-- architecture: `docs/architecture.md`
-- governance: `docs/governance.md`
-- backend setup: `docs/backend-setup.md`
+## How It Works
+1. Each integrated project writes feedback into its own sovereign feedback area.
+2. Projects do not write directly to curated learnings.
+3. Reusable artifacts can be promoted into a local curated learnings layer.
+4. Future work can search or request recommendations from that local corpus.
 
-Architecture is documented through three focused generated views under `docs/diagrams/`, with `docs/architecture.md` as the narrative source of truth.
+Managed integration encourages agents to consult local learnings during substantive work and to keep reusable feedback generalized, anonymized, and safe to share.
 
-## Current Scope
-- local development environments
-- project feedback capture
-- curated learnings lookup
-- optional automated curation through a configurable backend contract
+## Current Status
+`feedback-hub` is currently a local-first single-node tool. The public product surface focuses on local integration, capture, curation, and retrieval. Cross-node exchange and decentralized recommendation remain future work and are not part of the current public shell.
+
+## Architecture
+- Architecture overview: `docs/architecture.md`
+- Local artifact contract: `docs/feedback-artifacts.md`
+- Governance and curation rules: `docs/governance.md`
+- Operational guide: `docs/operations.md`
 
 ## Help
-- start with the command help surfaces
-- review the docs listed above
-- configure an automation backend only after the standalone shell is working locally
-
-Backend setup is configurable by the user. This repo does not assume any specific LLM CLI or API is already installed or prewired.
-
-## Project Policy Files
-- license: `LICENSE`
-- contributing: `CONTRIBUTING.md`
-- security reporting: `SECURITY.md`
-- code ownership: `CODEOWNERS`
-- community conduct: `CODE_OF_CONDUCT.md`
+```bash
+./scripts/feedback.sh --help
+./scripts/learnings.sh --help
+```

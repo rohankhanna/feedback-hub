@@ -12,58 +12,50 @@ require_tool() {
   fi
 }
 
-for tool in bash git jq sqlite3 mktemp; do
+for tool in bash git jq sqlite3 cmp mktemp rg; do
   require_tool "${tool}"
 done
 
-echo "[1/5] shell syntax"
+echo "[1/6] shell syntax"
 bash -n ./scripts/*.sh ./scripts/lib/*.sh
 
-echo "[2/5] command help surfaces"
-./scripts/feedback.sh --help >/dev/null
-./scripts/learnings.sh --help >/dev/null
+echo "[2/6] command help surfaces"
+feedback_help="$(./scripts/feedback.sh --help)"
+learnings_help="$(./scripts/learnings.sh --help)"
+printf '%s\n' "${feedback_help}" >/dev/null
+printf '%s\n' "${learnings_help}" >/dev/null
 
-echo "[3/5] public architecture surface"
-if [ ! -f docs/architecture.md ]; then
-  echo "Error: required file missing: docs/architecture.md" >&2
+echo "[3/6] public support-tool leakage"
+if printf '%s\n' "${feedback_help}" | rg -n 'hot-reload|hot reload' >/dev/null; then
+  echo "Error: feedback help references internal support tooling." >&2
   exit 1
 fi
-if [ -f docs/architecture.svg ] || [ -f docs/architecture.diagram.json ]; then
-  echo "Error: public main should not ship the deprecated single-view architecture diagram surface." >&2
+if rg -n 'hot-reload|hot reload' README.md docs/operations.md scripts/install_feedback.sh >/dev/null; then
+  echo "Error: public-facing surfaces reference internal support tooling." >&2
   exit 1
 fi
+
+echo "[4/6] architecture diagram freshness"
 ./scripts/render_architecture.sh --check >/dev/null
 
-echo "[4/5] required public docs"
-for path in \
-  README.md \
-  LICENSE \
-  CONTRIBUTING.md \
-  CODEOWNERS \
-  SECURITY.md \
-  CODE_OF_CONDUCT.md \
-  docs/architecture.md \
-  docs/governance.md \
-  docs/operations.md \
-  docs/backend-setup.md \
-  docs/diagrams/repo-local-integration.diagram.json \
-  docs/diagrams/repo-local-integration.svg \
-  docs/diagrams/canonical-artifacts-and-promotion-flow.diagram.json \
-  docs/diagrams/canonical-artifacts-and-promotion-flow.svg \
-  docs/diagrams/automation-and-rebuildable-state.diagram.json \
-  docs/diagrams/automation-and-rebuildable-state.svg \
-  scripts/render_architecture.sh; do
+echo "[5/6] required public docs"
+for path in README.md AUTHORSHIP.md docs/architecture.md docs/architecture.diagram.json docs/architecture.svg docs/feedback-artifacts.md docs/governance.md docs/operations.md; do
   if [ ! -f "${path}" ]; then
     echo "Error: required file missing: ${path}" >&2
     exit 1
   fi
 done
+if ! rg -n '^## Project Intent$' README.md >/dev/null; then
+  echo "Error: README.md is missing the required Project Intent section." >&2
+  exit 1
+fi
 
-echo "[5/5] smoke test"
+echo "[6/6] smoke test"
 tmp_root="$(mktemp -d)"
 tmp_data_root="${tmp_root}/hub-data"
 project_name="feedback-hub-verify-smoke"
 project_repo="${tmp_root}/${project_name}"
+hub_project_dir="${tmp_data_root}/projects/${project_name}"
 
 cleanup() {
   rm -rf "${tmp_root}"
@@ -77,6 +69,63 @@ printf '# %s\n' "${project_name}" > "${project_repo}/README.md"
 
 FEEDBACK_DATA_ROOT="${tmp_data_root}" ./scripts/feedback.sh apply "${project_repo}" >/dev/null
 FEEDBACK_DATA_ROOT="${tmp_data_root}" ./scripts/feedback.sh status "${project_repo}" --json >/dev/null
+FEEDBACK_DATA_ROOT="${tmp_data_root}" ./scripts/feedback.sh capture \
+  --kind lesson \
+  --title "Use durable checkpoints for restart-safe retries" \
+  --summary "Persist durable resume markers for restart-safe background retries." \
+  --context "A long-running scheduled flow may outlive one process." \
+  --action-taken "Moved retry checkpoints into durable local state." \
+  --result "Retries resumed safely after restarts." \
+  --reuse-guidance "Persist resume markers when retries can span restarts." \
+  "${project_repo}" \
+  --json >/dev/null
+unsafe_artifact="$(find "${hub_project_dir}/feedback/lessons" -type f -name '*.json' | head -n1)"
+if [ "$(find "${hub_project_dir}/feedback" -type f -name '*.json' | wc -l | tr -d '[:space:]')" -lt 1 ]; then
+  echo "Error: feedback capture smoke test did not create a JSON artifact." >&2
+  exit 1
+fi
+if find "${hub_project_dir}/feedback" -type f -name '*.md' | grep -q .; then
+  echo "Error: feedback capture smoke test still produced Markdown artifacts." >&2
+  exit 1
+fi
+unsafe_rel="${unsafe_artifact#${hub_project_dir}/feedback/}"
+if FEEDBACK_DATA_ROOT="${tmp_data_root}" ./scripts/promote_feedback.sh "${project_name}" "${unsafe_rel}" patterns copy >/dev/null 2>&1; then
+  echo "Error: promotion accepted unreviewed or non-public-safe feedback." >&2
+  exit 1
+fi
+FEEDBACK_DATA_ROOT="${tmp_data_root}" \
+FEEDBACK_WRITER_TYPE=agent \
+FEEDBACK_WRITER_TOOL=codex \
+FEEDBACK_WRITER_PROVIDER=openai \
+FEEDBACK_WRITER_MODEL_NAME=GPT-5.4 \
+FEEDBACK_WRITER_MODEL_ID=gpt-5.4 \
+FEEDBACK_REVIEW_STATUS=reviewed \
+FEEDBACK_ANONYMIZATION_REVIEWED=true \
+FEEDBACK_PROMPT_INJECTION_REVIEWED=true \
+FEEDBACK_DISTRIBUTION_SCOPE=generalized-shareable \
+FEEDBACK_PUBLIC_SAFE=true \
+FEEDBACK_EMBARGO_STATUS=none \
+FEEDBACK_RIGHTS_STATUS=original-or-authorized \
+./scripts/feedback.sh capture \
+  --kind outgoing \
+  --title "Use stable artifact identifiers for promotion" \
+  --summary "Promotion decisions should use stable artifact identifiers rather than local paths." \
+  --context "A local planner needed to choose reusable artifacts without exposing ownership paths." \
+  --action-taken "The plan output referenced artifact identifiers and resolved paths locally." \
+  --result "Promotion became less path-coupled and easier to interoperate with alternate stores." \
+  --reuse-guidance "Use transport metadata for routing and keep payload schemas tolerant of future change." \
+  --suggest patterns \
+  "${project_repo}" \
+  --json >/dev/null
+safe_artifact="$(find "${hub_project_dir}/feedback/outgoing" -type f -name '*.json' | head -n1)"
+safe_rel="${safe_artifact#${hub_project_dir}/feedback/}"
+FEEDBACK_DATA_ROOT="${tmp_data_root}" ./scripts/promote_feedback.sh "${project_name}" "${safe_rel}" patterns copy >/dev/null
+if [ "$(find "${tmp_data_root}/learnings/patterns" -type f -name '*.json' | wc -l | tr -d '[:space:]')" -lt 1 ]; then
+  echo "Error: promotion smoke test did not create a learning JSON artifact." >&2
+  exit 1
+fi
+find "${tmp_data_root}/learnings/patterns" -type f -name '*.json' -print0 \
+  | xargs -0 -n1 jq -e '.schema.artifact_class == "learning" and .policy.public_safe == true' >/dev/null
 FEEDBACK_DATA_ROOT="${tmp_data_root}" ./scripts/learnings.sh index --json >/dev/null
 FEEDBACK_DATA_ROOT="${tmp_data_root}" ./scripts/learnings.sh recommend "${project_repo}" --json >/dev/null
 FEEDBACK_DATA_ROOT="${tmp_data_root}" ./scripts/feedback.sh delete "${project_repo}" --purge --yes >/dev/null

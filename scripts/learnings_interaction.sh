@@ -6,6 +6,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/lib/common.sh"
 # shellcheck disable=SC1091
 source "${SCRIPT_DIR}/lib/learnings_store.sh"
+# shellcheck disable=SC1091
+source "${SCRIPT_DIR}/lib/artifacts.sh"
 
 usage() {
   cat <<'USAGE'
@@ -19,11 +21,34 @@ USAGE
 looks_like_feedback_artifact_path() {
   local candidate="${1:-}"
   case "${candidate}" in
-    feedback/*.md|feedback/*/*.md|*/feedback/*.md|*/feedback/*/*.md)
+    feedback/*.md|feedback/*/*.md|*/feedback/*.md|*/feedback/*/*.md|feedback/*.json|feedback/*/*.json|*/feedback/*.json|*/feedback/*/*.json)
       return 0
       ;;
   esac
   return 1
+}
+
+validate_generalized_note() {
+  local note="$1"
+  local project_name="$2"
+  local project_repo_path="$3"
+
+  [ -z "${note}" ] && return 0
+
+  if [ -n "${project_name}" ] && printf '%s\n' "${note}" | grep -Fqi "${project_name}"; then
+    echo "Error: interaction note must be generalized and must not include the local project name." >&2
+    return 1
+  fi
+
+  if [ -n "${project_repo_path}" ] && printf '%s\n' "${note}" | grep -Fq "${project_repo_path}"; then
+    echo "Error: interaction note must be generalized and must not include the local repo path." >&2
+    return 1
+  fi
+
+  if printf '%s\n' "${note}" | grep -Eq 'file:///(home|tmp)|/home/|/tmp/|[A-Za-z]:\\\\'; then
+    echo "Error: interaction note must not include concrete local paths." >&2
+    return 1
+  fi
 }
 
 if [ "$#" -lt 1 ]; then
@@ -114,48 +139,82 @@ PROJECT_REPO_PATH="$(feedback_resolve_project_path "${PROJECT_REPO_PATH}")"
 PROJECT_NAME="$(feedback_project_name_from_path "${PROJECT_REPO_PATH}")"
 "${SCRIPT_DIR}/register_project.sh" "${PROJECT_NAME}" >/dev/null
 
+validate_generalized_note "${NOTE}" "${PROJECT_NAME}" "${PROJECT_REPO_PATH}"
+
 INTERACTION_DIR="$(feedback_project_feedback_subdir "${PROJECT_NAME}" "incoming")"
 feedback_mkdir_if_missing "${INTERACTION_DIR}"
 
 STAMP="$(feedback_stamp_utc)"
 TIMESTAMP_UTC="$(feedback_timestamp_utc)"
-SLUG="$(feedback_slugify "${ACTION}-${LEARNING_TITLE}")"
-INTERACTION_ID="interaction_${STAMP}_$(feedback_slugify "${PROJECT_NAME}-${ACTION}-${LEARNING_ID}")"
-OUTPUT_FILE="${INTERACTION_DIR}/${STAMP}-${SLUG}.md"
+SLUG="$(feedback_slugify "${ACTION}-referenced-learning")"
+INTERACTION_ID="$(feedback_artifact_new_id "learning-interaction")"
+OUTPUT_FILE="${INTERACTION_DIR}/${STAMP}-${SLUG}.json"
 INDEX=1
 
 while [ -e "${OUTPUT_FILE}" ]; do
   INDEX=$((INDEX + 1))
-  OUTPUT_FILE="${INTERACTION_DIR}/${STAMP}-${SLUG}-${INDEX}.md"
+  OUTPUT_FILE="${INTERACTION_DIR}/${STAMP}-${SLUG}-${INDEX}.json"
 done
 
-{
-  printf -- '---\n'
-  printf 'schema_version: 1\n'
-  printf 'interaction_id: %s\n' "${INTERACTION_ID}"
-  printf 'project: %s\n' "${PROJECT_NAME}"
-  printf 'kind: incoming\n'
-  printf 'interaction_action: %s\n' "${ACTION}"
-  printf 'learning_id: %s\n' "${LEARNING_ID}"
-  printf 'learning_title: %s\n' "${LEARNING_TITLE}"
-  printf 'recorded_at: %s\n' "${TIMESTAMP_UTC}"
-  printf 'source_repo: %s\n' "${PROJECT_REPO_PATH}"
-  if [ -n "${NOTE}" ]; then
-    printf 'note: %s\n' "${NOTE}"
-  fi
-  printf -- '---\n\n'
-  printf '# Learning Interaction: %s %s\n\n' "$(printf '%s' "${ACTION}" | tr '[:lower:]' '[:upper:]' | sed 's/^./&/')" "${LEARNING_TITLE}"
-  printf '## Learning\n'
-  printf -- '- id: %s\n' "${LEARNING_ID}"
-  printf -- '- title: %s\n' "${LEARNING_TITLE}"
-  printf -- '- source_path: %s\n\n' "${LEARNING_PATH}"
-  printf '## Decision\n'
-  printf -- '- action: %s\n' "${ACTION}"
-  if [ -n "${NOTE}" ]; then
-    printf -- '- note: %s\n' "${NOTE}"
-  fi
-  printf '\n## Context\nDescribe why this learning was %s for this project.\n' "${ACTION}"
-} > "${OUTPUT_FILE}"
+if [ -n "${FEEDBACK_WRITER_TYPE:-}" ]; then
+  WRITER_TYPE="${FEEDBACK_WRITER_TYPE}"
+elif [ -n "${FEEDBACK_WRITER_MODEL_NAME:-}${FEEDBACK_WRITER_MODEL_ID:-}" ]; then
+  WRITER_TYPE="agent"
+else
+  WRITER_TYPE="human"
+fi
+
+WRITER_TOOL="${FEEDBACK_WRITER_TOOL:-feedback-hub}"
+WRITER_PROVIDER="${FEEDBACK_WRITER_PROVIDER:-}"
+WRITER_MODEL_NAME="${FEEDBACK_WRITER_MODEL_NAME:-}"
+WRITER_MODEL_ID="${FEEDBACK_WRITER_MODEL_ID:-}"
+REVIEW_STATUS="${FEEDBACK_REVIEW_STATUS:-unreviewed}"
+ANONYMIZATION_REVIEWED="${FEEDBACK_ANONYMIZATION_REVIEWED:-false}"
+PROMPT_INJECTION_REVIEWED="${FEEDBACK_PROMPT_INJECTION_REVIEWED:-false}"
+
+ARTIFACT_JSON="$(
+  feedback_artifact_base_json "learning_interaction" "${INTERACTION_ID}" "interaction" "${ACTION^} referenced learning" "${TIMESTAMP_UTC}" \
+    | jq \
+      --arg topic "$(feedback_slugify "${ACTION}-referenced-learning")" \
+      --arg learning_id "${LEARNING_ID}" \
+      --arg writer_type "${WRITER_TYPE}" \
+      --arg writer_tool "${WRITER_TOOL}" \
+      --arg writer_provider "${WRITER_PROVIDER}" \
+      --arg writer_model_name "${WRITER_MODEL_NAME}" \
+      --arg writer_model_id "${WRITER_MODEL_ID}" \
+      --arg review_status "${REVIEW_STATUS}" \
+      --argjson anonymization_reviewed "$(feedback_json_bool "${ANONYMIZATION_REVIEWED}")" \
+      --argjson prompt_injection_reviewed "$(feedback_json_bool "${PROMPT_INJECTION_REVIEWED}")" \
+      --arg action "${ACTION}" \
+      --arg note "${NOTE}" \
+      --arg summary "Recorded ${ACTION} for a referenced learning." \
+      --arg result "Learning marked as ${ACTION}." \
+      '
+      .subject.topic = $topic
+      | .writer.writer_type = $writer_type
+      | .writer.tool = $writer_tool
+      | .writer.provider = $writer_provider
+      | .writer.model.display_name = $writer_model_name
+      | .writer.model.id = $writer_model_id
+      | .review.status = $review_status
+      | .review.anonymization_reviewed = $anonymization_reviewed
+      | .review.prompt_injection_reviewed = $prompt_injection_reviewed
+      | .policy.distribution_scope = "project-private"
+      | .policy.public_safe = false
+      | .policy.embargo_status = "needs-review"
+      | .policy.rights_status = "needs-review"
+      | .content.summary = $summary
+      | .content.context = $note
+      | .content.result = $result
+      | .links.related_artifacts = [$learning_id]
+      | .extensions.interaction = {
+          action: $action,
+          note: $note
+        }
+      '
+)"
+
+printf '%s\n' "${ARTIFACT_JSON}" > "${OUTPUT_FILE}"
 
 JSONL_PATH="$(feedback_learnings_interactions_dir)/${PROJECT_NAME}.jsonl"
 feedback_mkdir_if_missing "$(dirname "${JSONL_PATH}")"
@@ -203,6 +262,7 @@ if [ "${JSON_OUTPUT}" = "true" ]; then
     --arg note "${NOTE}" \
     --arg recorded_at "${TIMESTAMP_UTC}" \
     --arg artifact_path "${OUTPUT_FILE}" \
+    --argjson artifact "${ARTIFACT_JSON}" \
     '{
       interaction_id: $interaction_id,
       project: $project,
@@ -210,7 +270,8 @@ if [ "${JSON_OUTPUT}" = "true" ]; then
       action: $action,
       note: $note,
       recorded_at: $recorded_at,
-      artifact_path: $artifact_path
+      artifact_path: $artifact_path,
+      artifact: $artifact
     }'
 else
   echo "Recorded ${ACTION}: ${LEARNING_ID}"
