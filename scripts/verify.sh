@@ -38,8 +38,8 @@ fi
 echo "[4/6] architecture diagram freshness"
 ./scripts/render_architecture.sh --check >/dev/null
 
-echo "[5/6] required public docs"
-for path in README.md AUTHORSHIP.md docs/architecture.md docs/architecture.diagram.json docs/architecture.svg docs/feedback-artifacts.md docs/governance.md docs/operations.md; do
+echo "[5/6] required public docs and guardrails"
+for path in README.md AUTHORSHIP.md LICENSE CONTRIBUTING.md SECURITY.md CODEOWNERS CODE_OF_CONDUCT.md docs/architecture.md docs/architecture.diagram.json docs/architecture.svg docs/feedback-artifacts.md docs/governance.md docs/operations.md docs/adrs/README.md .githooks/pre-push; do
   if [ ! -f "${path}" ]; then
     echo "Error: required file missing: ${path}" >&2
     exit 1
@@ -47,6 +47,10 @@ for path in README.md AUTHORSHIP.md docs/architecture.md docs/architecture.diagr
 done
 if ! rg -n '^## Project Intent$' README.md >/dev/null; then
   echo "Error: README.md is missing the required Project Intent section." >&2
+  exit 1
+fi
+if [ "$(find docs/adrs -maxdepth 1 -type f -name '[0-9][0-9][0-9][0-9]-*.md' | wc -l | tr -d '[:space:]')" -lt 1 ]; then
+  echo "Error: at least one ADR is required under docs/adrs/." >&2
   exit 1
 fi
 

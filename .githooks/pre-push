@@ -1,0 +1,96 @@
+#!/usr/bin/env bash
+# Tracked public-push guardrail for feedback-hub.
+#
+# Rules:
+#   1. Pushes to the `public` remote must be exactly main -> main.
+#   2. No force-push to public main.
+#   3. Pushed tree on public must not contain denylisted paths.
+#   4. Reject placeholder AI identities in author/committer metadata on any push.
+#
+# Activate with: git config core.hooksPath .githooks
+
+set -euo pipefail
+
+remote_name="${1:-}"
+remote_url="${2:-}"
+
+zero="0000000000000000000000000000000000000000"
+
+public_denylist=(
+  "AGENTS.md"
+  "AGENTS.md.sha256"
+  "CLAUDE.md"
+  "GEMINI.md"
+  "PROJECT_INTENT.md"
+  "PUBLIC_PRIVATE_BOUNDARY.md"
+  ".hot-reload.watch"
+  ".claude"
+  ".gemini"
+  "reflexive.toml"
+  "config/sync.env"
+  "config/sync.env.example"
+  "config/agents.env"
+  "docs/backlog.md"
+  "docs/roadmap.md"
+  "docs/retrieval-benchmark.md"
+  "docs/sync-automation.md"
+  "projects"
+  "learnings"
+  ".state"
+  "last"
+)
+
+identity_denylist_regex='(Codex <codex@local>|codex@local|Claude <claude@local>|Gemini <gemini@local>)'
+
+fail() {
+  echo "pre-push: $*" >&2
+  exit 1
+}
+
+check_identity_history() {
+  local range="$1"
+  if git log --format='%an <%ae>%n%cn <%ce>' "$range" 2>/dev/null | grep -Eq "$identity_denylist_regex"; then
+    fail "placeholder AI identity found in pushed history ($range)"
+  fi
+}
+
+check_public_tree() {
+  local sha="$1"
+  local entry
+  while IFS= read -r entry; do
+    for bad in "${public_denylist[@]}"; do
+      if [[ "$entry" == "$bad" || "$entry" == "$bad"/* ]]; then
+        fail "denylisted path '$entry' in public-bound tree $sha"
+      fi
+    done
+  done < <(git ls-tree -r --name-only "$sha")
+}
+
+while read -r local_ref local_sha remote_ref remote_sha; do
+  if [[ "$local_sha" == "$zero" ]]; then
+    continue
+  fi
+
+  if [[ "$remote_name" == "public" ]]; then
+    if [[ "$local_ref" != "refs/heads/main" || "$remote_ref" != "refs/heads/main" ]]; then
+      fail "public remote only accepts main -> main (got $local_ref -> $remote_ref)"
+    fi
+    if [[ "$remote_sha" != "$zero" ]]; then
+      if ! git merge-base --is-ancestor "$remote_sha" "$local_sha"; then
+        fail "non-fast-forward push to public main rejected"
+      fi
+      check_identity_history "$remote_sha..$local_sha"
+    else
+      check_identity_history "$local_sha"
+    fi
+    check_public_tree "$local_sha"
+  else
+    if [[ "$remote_sha" != "$zero" ]]; then
+      check_identity_history "$remote_sha..$local_sha"
+    else
+      check_identity_history "$local_sha"
+    fi
+  fi
+done
+
+exit 0

@@ -56,6 +56,7 @@ Managed integration encourages agents to consult local learnings during substant
 
 ## Architecture
 - Architecture overview: `docs/architecture.md`
+- Architecture decision records: `docs/adrs/README.md`
 - Local artifact contract: `docs/feedback-artifacts.md`
 - Governance and curation rules: `docs/governance.md`
 - Operational guide: `docs/operations.md`

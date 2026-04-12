@@ -1,3 +1,14 @@
+verify:
+  stage: test
+  image: debian:bookworm-slim
+  variables:
+    DEBIAN_FRONTEND: noninteractive
+  before_script:
+  - apt-get update
+  - apt-get install -y --no-install-recommends bash coreutils findutils git jq ripgrep sqlite3
+  script:
+  - ./scripts/verify.sh
+
 # You can override the included template(s) by including variable overrides
 # SAST customization: https://docs.gitlab.com/user/application_security/sast/#available-cicd-variables
 # Secret Detection customization: https://docs.gitlab.com/user/application_security/secret_detection/pipeline/configure/

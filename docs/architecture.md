@@ -27,6 +27,12 @@ Verify it is current with:
 
 ![feedback-hub architecture](architecture.svg)
 
+## Decision Records
+- `docs/adrs/README.md`
+- `docs/adrs/0001-qualified-dual-branch-operating-model.md`
+- `docs/adrs/0002-structured-json-artifacts-and-externalized-runtime-data.md`
+- `docs/adrs/0003-managed-runtime-freshness-enforcement.md`
+
 ## Implementation details
 - Version-controlled content stays in the repo checkout:
   - scripts
