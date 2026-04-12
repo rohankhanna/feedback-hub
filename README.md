@@ -11,24 +11,24 @@
 
 ## Quickstart
 ```bash
-# 1) Optional: install shell shims
+# 1) Install the feedback and learnings commands
 ./scripts/install_feedback.sh
 
 # 2) Integrate a local project
-./scripts/feedback.sh apply /absolute/path/to/project
+feedback apply /absolute/path/to/project
 
 # 3) Capture generalized feedback
-./scripts/feedback.sh lesson "Short generalized lesson" /absolute/path/to/project
+feedback lesson "Short generalized lesson" /absolute/path/to/project
 
 # 4) Build the local learnings index
-./scripts/learnings.sh index
+learnings index
 
 # 5) Search or request recommendations
-./scripts/learnings.sh recommend /absolute/path/to/project
-./scripts/learnings.sh search "shutdown state recovery"
+learnings recommend /absolute/path/to/project
+learnings search "shutdown state recovery"
 ```
 
-The repo-local scripts are the canonical public interface. The installed `feedback` and `learnings` shims are optional convenience wrappers.
+After installation, `feedback` and `learnings` are the primary user-facing commands. The repo-local scripts remain available underneath those commands when you need the implementation entrypoints directly.
 
 ## Verification
 Canonical verification path:
@@ -63,6 +63,6 @@ Managed integration encourages agents to consult local learnings during substant
 
 ## Help
 ```bash
-./scripts/feedback.sh --help
-./scripts/learnings.sh --help
+feedback --help
+learnings --help
 ```

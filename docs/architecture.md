@@ -50,11 +50,11 @@ Verify it is current with:
 - Promotion path:
   1. Project writes artifact to `projects/<project>/feedback/...`.
   2. Manager reviews and approves.
-  3. Manager promotes with `scripts/promote_feedback.sh` into one of:
+  3. Manager promotes with `learnings promote` into one of:
      - `learnings/patterns`
      - `learnings/templates`
      - `learnings/agents`
      - `learnings/anti-patterns`
 - Permission model:
-  - `scripts/lock_learnings.sh` enforces read-only learnings by default.
-  - `scripts/unlock_learnings.sh` temporarily allows manager writes.
+  - `learnings lock` enforces read-only learnings by default.
+  - `learnings unlock` temporarily allows manager writes.

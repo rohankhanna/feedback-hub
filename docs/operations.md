@@ -29,26 +29,26 @@ Refresh the committed diagram if needed with:
 ```
 
 ## Install
-The repo-local scripts are the canonical interface:
+After installation, use the native CLI commands:
 
 ```bash
-./scripts/feedback.sh --help
-./scripts/learnings.sh --help
+feedback --help
+learnings --help
 ```
 
-Optional shell shims can be installed with:
+Install them with:
 
 ```bash
 ./scripts/install_feedback.sh
 ```
 
-That installs `feedback` and `learnings` on your local `PATH` as convenience wrappers around the repo-local scripts.
+That installs `feedback` and `learnings` on your local `PATH`.
 
 ## Integrate A Project
 Apply managed feedback-hub integration to a local project:
 
 ```bash
-./scripts/feedback.sh apply /absolute/path/to/project
+feedback apply /absolute/path/to/project
 ```
 
 This command:
@@ -67,24 +67,24 @@ The command is idempotent. Running it again refreshes the project to the current
 Bulk refresh across known local repos:
 
 ```bash
-./scripts/feedback.sh apply-all
+feedback apply-all
 ```
 
 Check integration status:
 
 ```bash
-./scripts/feedback.sh status /absolute/path/to/project
+feedback status /absolute/path/to/project
 ```
 
 ## Capture Feedback
 Capture feedback during substantive work rather than as optional cleanup:
 
 ```bash
-./scripts/feedback.sh lesson "Short generalized lesson" /absolute/path/to/project
-./scripts/feedback.sh decision "Prefer machine-readable output for automation" /absolute/path/to/project
-./scripts/feedback.sh incident "Background retry state was lost across restart" /absolute/path/to/project
-./scripts/feedback.sh incoming "Reusable learning adopted from local curated memory" /absolute/path/to/project
-./scripts/feedback.sh outgoing "Generalized pattern worth reusing elsewhere" /absolute/path/to/project
+feedback lesson "Short generalized lesson" /absolute/path/to/project
+feedback decision "Prefer machine-readable output for automation" /absolute/path/to/project
+feedback incident "Background retry state was lost across restart" /absolute/path/to/project
+feedback incoming "Reusable learning adopted from local curated memory" /absolute/path/to/project
+feedback outgoing "Generalized pattern worth reusing elsewhere" /absolute/path/to/project
 ```
 
 Feedback artifacts should be:
@@ -99,25 +99,25 @@ The evolving structured local artifact contract is documented in `docs/feedback-
 Build or rebuild the local learnings index:
 
 ```bash
-./scripts/learnings.sh index
+learnings index
 ```
 
 Open a curation window:
 
 ```bash
-./scripts/learnings.sh unlock
+learnings unlock
 ```
 
 Promote an approved artifact:
 
 ```bash
-./scripts/learnings.sh promote <project_name> <feedback_relative_path> <learnings_subdir> [copy|move]
+learnings promote <project_name> <feedback_relative_path> <learnings_subdir> [copy|move]
 ```
 
 Close the curation window:
 
 ```bash
-./scripts/learnings.sh lock
+learnings lock
 ```
 
 Allowed destination roots:
@@ -130,27 +130,27 @@ Allowed destination roots:
 Request recommendations for a local project:
 
 ```bash
-./scripts/learnings.sh recommend /absolute/path/to/project
+learnings recommend /absolute/path/to/project
 ```
 
 Search the local curated corpus:
 
 ```bash
-./scripts/learnings.sh search "shutdown state recovery"
+learnings search "shutdown state recovery"
 ```
 
 Inspect learnings usage:
 
 ```bash
-./scripts/learnings.sh usage /absolute/path/to/project
+learnings usage /absolute/path/to/project
 ```
 
 Record whether a learning was adopted, rejected, or deferred:
 
 ```bash
-./scripts/learnings.sh adopt <learning_id> /absolute/path/to/project
-./scripts/learnings.sh reject <learning_id> /absolute/path/to/project --reason "Not relevant here"
-./scripts/learnings.sh defer <learning_id> /absolute/path/to/project --reason "Revisit later"
+learnings adopt <learning_id> /absolute/path/to/project
+learnings reject <learning_id> /absolute/path/to/project --reason "Not relevant here"
+learnings defer <learning_id> /absolute/path/to/project --reason "Revisit later"
 ```
 
 ## Optional Automation
@@ -158,5 +158,5 @@ Local synchronization remains optional. The core product works without scheduled
 
 ## Troubleshooting
 - Run `./scripts/verify.sh` to confirm the repo is internally consistent.
-- Use `./scripts/feedback.sh status /absolute/path/to/project` to inspect a local integration.
-- Use `./scripts/learnings.sh --help` and `./scripts/feedback.sh --help` for command-level reference.
+- Use `feedback status /absolute/path/to/project` to inspect a local integration.
+- Use `learnings --help` and `feedback --help` for command-level reference.

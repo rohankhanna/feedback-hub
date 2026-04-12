@@ -27,7 +27,7 @@ Before promotion into curated learnings, an artifact should be:
 - reviewed for sharing, rights, and public-safety constraints
 
 ## Auditability
-- `scripts/promote_feedback.sh` appends a timestamped entry to `learnings/promotion-log.tsv`.
+- `learnings promote` appends a timestamped entry to `learnings/promotion-log.tsv`.
 - `learnings validate` appends to `learnings/validation-log.tsv`.
 - `learnings supersede` appends to `learnings/supersession-log.tsv`.
 
